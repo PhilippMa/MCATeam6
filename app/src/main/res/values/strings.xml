@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">MCATeam6</string>
+
+<!--    Title for Nav Menu -->
+    <string name="menu1">MENU1</string>
+    <string name="menu2">MENU2</string>
+    <string name="menu3">MENU3</string>
+    <string name="menu4">MENU4</string>
+
 </resources>
