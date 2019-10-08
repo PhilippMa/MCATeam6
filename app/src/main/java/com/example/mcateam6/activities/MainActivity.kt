@@ -11,6 +11,8 @@ import androidx.navigation.ui.setupWithNavController
 import com.example.mcateam6.R
 import com.example.mcateam6.fragments.BarcodeFragment
 import com.example.mcateam6.fragments.ProductInfoFragment
+import com.example.mcateam6.fragments.SearchFragment
+import com.example.mcateam6.fragments.SettingFragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -38,10 +40,10 @@ class MainActivity : AppCompatActivity() {
                         fragmentTransaction.replace(R.id.layout_root, BarcodeFragment())
                     }
                     R.id.menu_3 -> {
-
+                        fragmentTransaction.replace(R.id.layout_root, SearchFragment())
                     }
                     R.id.menu_4 -> {
-
+                        fragmentTransaction.replace(R.id.layout_root, SettingFragment())
                     }
                 }
                 fragmentTransaction.commit()
