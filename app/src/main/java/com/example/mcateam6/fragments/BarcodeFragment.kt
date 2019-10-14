@@ -29,6 +29,7 @@ class BarcodeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Toast.makeText(activity, "Fragment started!", Toast.LENGTH_SHORT).show()
         val v = inflater.inflate(R.layout.fragment_barcode, container, false);
         view_finder = v.findViewById(R.id.view_finder)
 
@@ -46,8 +47,6 @@ class BarcodeFragment : Fragment() {
     }
 
     private fun startCamera(){
-        Toast.makeText(activity, "START CAMERA", Toast.LENGTH_SHORT)
-            .show()
         // Create configuration object for the view_finder use case
         val previewConfig = PreviewConfig.Builder().apply {
             setTargetAspectRatio(Rational(1, 1))
@@ -73,7 +72,7 @@ class BarcodeFragment : Fragment() {
         // If Android Studio complains about "this" being not a LifecycleOwner
         // try rebuilding the project or updating the appcompat dependency to
         // version 1.1.0 or higher.
-        CameraX.bindToLifecycle(activity, preview)
+        CameraX.bindToLifecycle(this, preview)
     }
     private fun updateTransform(){
         val matrix = Matrix()
