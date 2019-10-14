@@ -3,13 +3,15 @@ package com.example.mcateam6.database
 import android.util.Log
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Product
+import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 
 class RemoteDatabase {
 
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
-    fun upload(p: Product): Boolean {
-        val db = FirebaseFirestore.getInstance();
+    fun upload(p: Product): Task<DocumentReference> {
         val productMap: HashMap<String, Any> = HashMap()
         productMap["name_english"] = p.englishName
         productMap["name_korean"] = p.koreanName
@@ -21,16 +23,14 @@ class RemoteDatabase {
         return db.collection("products")
             .add(productMap)
             .addOnSuccessListener { documentReference ->
-                Log.d(documentReference.toString(), "Successful")
+                Log.d("FirebaseDatabase", "Upload successful")
             }
             .addOnFailureListener { e ->
-                Log.w("Error", "Error adding document", e)
+                Log.e("FirebaseDatabase", "Error uploading document", e)
             }
-            .isSuccessful
     }
 
-    fun upload(englishName: String,  koreanName: String, barcode: String?, description: String, ingredients: List<Product>, attributes: Map<Attribute, Boolean>): Boolean {
-        val db = FirebaseFirestore.getInstance();
+    fun upload(englishName: String,  koreanName: String, barcode: String?, description: String, ingredients: List<Product>, attributes: Map<Attribute, Boolean>): Task<DocumentReference> {
         val productMap: HashMap<String, Any> = HashMap()
         productMap["name_english"] = englishName
         productMap["name_korean"] = koreanName
@@ -42,12 +42,11 @@ class RemoteDatabase {
         return db.collection("products")
             .add(productMap)
             .addOnSuccessListener { documentReference ->
-                Log.d(documentReference.toString(), "Successful")
+                Log.d("FirebaseDatabase", "Upload successful")
             }
             .addOnFailureListener { e ->
-                Log.w("Error", "Error adding document", e)
+                Log.e("FirebaseDatabase", "Error uploading document", e)
             }
-            .isSuccessful
     }
 
 
