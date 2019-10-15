@@ -14,8 +14,8 @@ package com.example.mcateam6.datatypes
 data class Product(
     var englishName: String = "",
     var koreanName: String = "",
-    var description: String = "",
     var barcode: String? = null,
+    var description: String = "",
     var ingredients: List<Product> = emptyList(),
     var attributes: Map<Attribute, Boolean> = emptyMap()
 ) {
