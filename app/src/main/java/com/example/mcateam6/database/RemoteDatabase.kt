@@ -7,6 +7,8 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.*
+import kotlin.collections.HashMap
 
 class RemoteDatabase {
 
@@ -15,9 +17,43 @@ class RemoteDatabase {
         var name_korean: String = "",
         var description: String = "",
         var barcode: String? = null,
-        var ingredients: List<Product> = emptyList(),
-        var attributes: Map<String, Boolean> = emptyMap()
-    )
+        // TODO change datatype
+        var ingredients: List<String> = emptyList(),
+        var attributes: Map<String, String> = emptyMap()
+    ) {
+
+        /**
+         * convert to object of Product class
+         * @see Product
+         * @return object of class Product
+         */
+        fun toProduct() : Product {
+            val aNew = convertAttributes()
+            val pNew = convertProducts()
+            return Product(name_english, name_korean, barcode, description, pNew, aNew)
+        }
+
+        /**
+         * convert the var attributes to a Map with keys of Enum Attribute
+         * @see Attribute
+         * @return map<Attribute, Boolean>
+         */
+        private fun convertAttributes() : Map<Attribute, Boolean> {
+            val aNew : EnumMap<Attribute, Boolean> = EnumMap(Attribute::class.java)
+            attributes.onEach { entry -> aNew[Attribute.valueOf(entry.key)] = entry.value.toBoolean() }
+            return aNew
+        }
+
+        /**
+         * convert list of Strings referencing other documents to a list of products
+         * @see Product
+         * @return list of products (list<Product>)
+         */
+        private fun convertProducts() : List<Product> {
+            // TODO implement
+            return emptyList()
+        }
+    }
 
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
 
@@ -54,13 +90,15 @@ class RemoteDatabase {
             val attributes : HashMap<String, String> = HashMap()
             p.attributes.onEach { entry -> attributes[entry.key.toString()] = entry.value.toString() }
 
+            val ingredients: List<Product> = emptyList()
+
             val productMap: HashMap<String, Any> = HashMap()
             productMap["name_english"] = p.englishName
             productMap["name_korean"] = p.koreanName
             productMap["barcode"] = p.barcode.orEmpty()
             productMap["description"] = p.description
             //TODO add ingredients
-            productMap["ingredients"] = listOf({})
+            productMap["ingredients"] = ingredients
             productMap["attributes"] = attributes
 
             val docRef = col.document()

@@ -90,6 +90,7 @@ class DatabaseInstrumentedTest {
         val prod = Product("Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
         val task = db.upload(ingre1, ingre2, prod)
         val res = Tasks.await(task, time, timeUnit)
+        // TODO change assert
         assertNotNull("Upload failed", res)
     }
 
@@ -102,8 +103,9 @@ class DatabaseInstrumentedTest {
 
     @Test
     fun test_downloadProduct() {
-        val id = "ocIj7Vfsvd3TeceqZjLR"
-        val res = Tasks.await(db.getProductById(id))
+        val id = "xZQQxyHXBYf25i6I2UWT"
+        val res = Tasks.await(db.getProductById(id)).toProduct()
+        Log.i(this.javaClass.name, "Product: $res")
         assertNotNull("Downloaded product is null", res)
     }
 }
