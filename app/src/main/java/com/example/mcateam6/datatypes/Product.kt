@@ -1,5 +1,7 @@
 package com.example.mcateam6.datatypes
 
+import com.example.mcateam6.database.RemoteDatabase
+
 /**
  * This class represents an object from the database with its attributes. This constructor can be used to set all available attributes of a product.
  * @param englishName English name of the product
@@ -20,4 +22,13 @@ data class Product(
     var attributes: Map<Attribute, Boolean> = emptyMap()
 ) {
 
+    companion object {
+        //TODO add ingredients and attributes
+        fun equals(p: Product, fP: RemoteDatabase.FirebaseProduct): Boolean {
+            return p.englishName.equals(fP.name_english) &&
+                    p.koreanName.equals(fP.name_korean) &&
+                    p.barcode.equals(fP.barcode) &&
+                    p.description.equals(fP.description)
+        }
+    }
 }
