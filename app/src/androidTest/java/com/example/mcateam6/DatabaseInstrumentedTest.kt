@@ -21,12 +21,16 @@ import java.util.concurrent.TimeUnit
 class DatabaseInstrumentedTest {
 
     private lateinit var db: RemoteDatabase
+    private val ingre1 = Product("Ingredient1", "name1", "123123123", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, true)))
+    private val ingre2 = Product("Ingredient2", "name2", "321321321", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
+    private val prod = Product("Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
 
 
 
     @Before
     fun initialize() {
         db = RemoteDatabase()
+        db.signIn()
     }
 
     //Timeout for upload tests
@@ -85,9 +89,6 @@ class DatabaseInstrumentedTest {
 
     @Test
     fun test_uploadProductDetailed() {
-        val ingre1 = Product("Ingredient1", "name1", "123123123", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, true)))
-        val ingre2 = Product("Ingredient2", "name2", "321321321", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
-        val prod = Product("Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
         val task = db.upload(ingre1, ingre2, prod)
         val res = Tasks.await(task, time, timeUnit)
         // TODO change assert
@@ -107,5 +108,36 @@ class DatabaseInstrumentedTest {
         val res = Tasks.await(db.getProductById(id)).toProduct()
         Log.i(this.javaClass.name, "Product: $res")
         assertNotNull("Downloaded product is null", res)
+    }
+
+    @Test
+    fun test_signIn() {
+        val task = db.signIn()
+        val res = Tasks.await(task, time, timeUnit)
+        assertNotNull("user is null", res)
+    }
+
+    @Test
+    fun test_getProductByEnglishName() {
+        val task = db.getProductByEnglishName("Product")
+        val res = Tasks.await(task, time, timeUnit)
+        Log.i(this.javaClass.name, "Product: $res")
+        assertTrue("products not identical", Product.equals(prod, res))
+    }
+
+    @Test
+    fun test_getProductByKoreanName() {
+        val task = db.getProductByKoreanName("name3")
+        val res = Tasks.await(task, time, timeUnit)
+        Log.i(this.javaClass.name, "Product: $res")
+        assertTrue("products not identical", Product.equals(prod, res))
+    }
+
+    @Test
+    fun test_getProductByBarcode() {
+        val task = db.getProductByBarcode("456654456")
+        val res = Tasks.await(task, time, timeUnit)
+        Log.i(this.javaClass.name, "Product: $res")
+        assertTrue("products not identical", Product.equals(prod, res))
     }
 }
