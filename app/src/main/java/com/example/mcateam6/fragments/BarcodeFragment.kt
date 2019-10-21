@@ -9,7 +9,6 @@ import android.graphics.Matrix
 import android.util.Rational
 import android.util.Size
 import android.view.*
-import android.widget.Toast
 import androidx.camera.core.CameraX
 import androidx.camera.core.Preview
 import androidx.camera.core.PreviewConfig
@@ -28,7 +27,6 @@ class BarcodeFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        Toast.makeText(activity, "Fragment started!", Toast.LENGTH_SHORT).show()
         val v = inflater.inflate(R.layout.fragment_barcode, container, false);
         view_finder = v.findViewById(R.id.view_finder)
 
@@ -101,11 +99,9 @@ class BarcodeFragment : Fragment() {
     ) {
         if (requestCode== REQUEST_CODE_PERMISSIONS){
             if (allPermissionGranted()) {
-                Toast.makeText(activity, "PERMISSION GRATNED", Toast.LENGTH_SHORT).show()
                 view_finder.post{ startCamera()}
             }
         }else {
-            Toast.makeText(activity,"PERMISSION NOT GRANTED", Toast.LENGTH_SHORT).show()
             activity?.finish()
         }
     }
