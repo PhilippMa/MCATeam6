@@ -3,6 +3,7 @@ package com.example.mcateam6
 
 import android.util.Log
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Product
@@ -139,5 +140,14 @@ class DatabaseInstrumentedTest {
         val res = Tasks.await(task, time, timeUnit)
         Log.i(this.javaClass.name, "Product: $res")
         assertTrue("products not identical", Product.equals(prod, res))
+    }
+
+    @Test
+    fun test_uploadImage() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val image = context.resources.openRawResource(R.raw.firework)
+        val task = db.uploadImage("firework", image)
+        val res = Tasks.await(task, time, timeUnit)
+        assertTrue("error on upload", res.bytesTransferred > 0)
     }
 }

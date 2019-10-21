@@ -8,12 +8,18 @@ import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.firestore.*
+import com.google.firebase.storage.FirebaseStorage
+import com.google.firebase.storage.UploadTask
+import java.io.File
+import java.io.FileInputStream
+import java.io.InputStream
 import java.util.*
 import kotlin.collections.HashMap
 
 class RemoteDatabase {
 
     data class FirebaseProduct(
+        var id: String = "",
         var name_english: String = "",
         var name_korean: String = "",
         var description: String = "",
@@ -31,7 +37,7 @@ class RemoteDatabase {
         fun toProduct(): Product {
             val aNew = convertAttributes()
             val pNew = convertProducts()
-            return Product(name_english, name_korean, barcode, description, pNew, aNew)
+            return Product(id, name_english, name_korean, barcode, description, pNew, aNew, null)
         }
 
         /**
@@ -60,9 +66,11 @@ class RemoteDatabase {
 
     private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val storage: FirebaseStorage = FirebaseStorage.getInstance()
+
     private var user: FirebaseUser?
 
-    private val prodColl: CollectionReference
+    val prodColl: CollectionReference
         get() = db.collection("products")
 
     constructor(
@@ -74,6 +82,7 @@ class RemoteDatabase {
     constructor() {
         this.user = auth.currentUser
     }
+
 
     fun signIn(): Task<AuthResult> {
         return auth.signInAnonymously()
@@ -112,20 +121,22 @@ class RemoteDatabase {
             }
     }
 
-    // TODO test
-    fun uploadNew(p: Product): Task<Void> {
-        return prodColl.document().set(p);
-    }
-
     /**
-     * Upload multiple products
+     * Upload multiple products. Make sure that all ingredients are uploaded
+     * before uploading the product
      * @param products one or more products
      */
     fun upload(vararg products: Product): Task<Void> {
-        val col = prodColl
         val batch = db.batch()
 
         for (p in products) {
+
+            if (p.id == "" || p.document == null) {
+                p.createDocument(this)
+            }
+
+            val docRef = p.document
+
 
             // Map attribute map to a <String, String> map for compatibility with the firestore datatypes
             val attributes: HashMap<String, String> = HashMap()
@@ -133,19 +144,16 @@ class RemoteDatabase {
                 attributes[entry.key.toString()] = entry.value.toString()
             }
 
-            val ingredients: List<Product> = emptyList()
-
             val productMap: HashMap<String, Any> = HashMap()
+
             productMap["name_english"] = p.englishName
             productMap["name_korean"] = p.koreanName
             productMap["barcode"] = p.barcode.orEmpty()
             productMap["description"] = p.description
-            //TODO add ingredients
-            productMap["ingredients"] = ingredients
+            productMap["ingredients"] = p.ingredients.map { product -> db.document("/products/${product.id}") }
             productMap["attributes"] = attributes
 
-            val docRef = col.document()
-            batch.set(docRef, productMap)
+            batch.set(docRef!!, productMap)
         }
 
         return batch.commit()
@@ -218,5 +226,26 @@ class RemoteDatabase {
         val query = prodColl.whereEqualTo("barcode", barcode).limit(1)
         return query.get()
             .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java)[0] }
+    }
+
+    fun uploadImage(filename: String, image: File): UploadTask {
+        assert(image.extension == "png")
+        val storageRef = storage.reference
+        val pRef = storageRef.child("$filename.png")
+        val pIRef = storageRef.child("images/" + pRef.path)
+
+        val stream = FileInputStream(image)
+
+        val uploadTask = pIRef.putStream(stream)
+        return uploadTask
+    }
+
+    fun uploadImage(filename: String, imageStream: InputStream): UploadTask {
+        val storageRef = storage.reference
+        val pRef = storageRef.child("$filename.png")
+        val pIRef = storageRef.child("images/" + pRef.path)
+
+        val uploadTask = pIRef.putStream(imageStream)
+        return uploadTask
     }
 }
