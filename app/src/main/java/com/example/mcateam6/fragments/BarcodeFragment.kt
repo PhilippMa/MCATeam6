@@ -6,7 +6,6 @@ import com.example.mcateam6.R
 import android.Manifest
 import android.content.pm.PackageManager
 import android.graphics.Matrix
-import android.util.Log
 import android.util.Rational
 import android.util.Size
 import android.view.*
