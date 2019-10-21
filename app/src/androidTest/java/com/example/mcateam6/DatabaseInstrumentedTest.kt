@@ -27,7 +27,6 @@ class DatabaseInstrumentedTest {
     private val prod = Product("Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
 
 
-
     @Before
     fun initialize() {
         db = RemoteDatabase()
@@ -35,7 +34,7 @@ class DatabaseInstrumentedTest {
     }
 
     //Timeout for upload tests
-    private val time: Long = 10
+    private val time: Long = 30
     private val timeUnit = TimeUnit.SECONDS
 
     /**
@@ -146,8 +145,40 @@ class DatabaseInstrumentedTest {
     fun test_uploadImage() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val image = context.resources.openRawResource(R.raw.firework)
-        val task = db.uploadImage("firework", image)
+        prod.createDocument(db)
+        val task = db.uploadImage(prod, image)
         val res = Tasks.await(task, time, timeUnit)
         assertTrue("error on upload", res.bytesTransferred > 0)
+    }
+
+    @Test
+    fun test_uploadDownloadImage() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val image = context.resources.openRawResource(R.raw.firework)
+        prod.createDocument(db)
+        val task = db.uploadImage(prod, image)
+        val res = Tasks.await(task, time, timeUnit)
+        assertTrue("error on upload", res.bytesTransferred > 0)
+
+        val DLtask = db.downloadImage(prod)
+        val DLres = Tasks.await(DLtask, time, timeUnit)
+        assertEquals(res.bytesTransferred.toInt(), DLres.size)
+    }
+
+    @Test
+    fun test_uploadDownloadSmallImage() {
+        val context = InstrumentationRegistry.getInstrumentation().targetContext
+        val image = context.resources.openRawResource(R.raw.firework)
+        prod.createDocument(db)
+        val task = db.uploadImage(prod, image)
+        val res = Tasks.await(task, time, timeUnit)
+        assertTrue("error on upload", res.bytesTransferred > 0)
+
+        Log.i("test_uploadDownloadSmallImage", "image upload successful")
+
+        val DLtask = db.downloadImage_Small(prod)
+        val DLres = Tasks.await(DLtask, time, timeUnit)
+        Log.i("test_uploadDownloadSmallImage", "small image size: ${DLres.size}")
+        assertNotEquals(res.bytesTransferred.toInt(), DLres.size)
     }
 }

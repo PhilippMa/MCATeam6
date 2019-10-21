@@ -1,5 +1,6 @@
 package com.example.mcateam6.database
 
+import android.media.Image
 import android.util.Log
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Product
@@ -69,6 +70,8 @@ class RemoteDatabase {
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 
     private var user: FirebaseUser?
+
+    private var SMALL: Int = 1000
 
     val prodColl: CollectionReference
         get() = db.collection("products")
@@ -228,10 +231,11 @@ class RemoteDatabase {
             .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java)[0] }
     }
 
-    fun uploadImage(filename: String, image: File): UploadTask {
+    fun uploadImage(p: Product, image: File): UploadTask {
         assert(image.extension == "png")
+        assert(p.id != "")
         val storageRef = storage.reference
-        val pRef = storageRef.child("$filename.png")
+        val pRef = storageRef.child("${p.id}.png")
         val pIRef = storageRef.child("images/" + pRef.path)
 
         val stream = FileInputStream(image)
@@ -240,12 +244,27 @@ class RemoteDatabase {
         return uploadTask
     }
 
-    fun uploadImage(filename: String, imageStream: InputStream): UploadTask {
+    fun uploadImage(p: Product, imageStream: InputStream): UploadTask {
+        assert(p.id != "")
         val storageRef = storage.reference
-        val pRef = storageRef.child("$filename.png")
+        val pRef = storageRef.child("${p.id}.png")
         val pIRef = storageRef.child("images/" + pRef.path)
 
         val uploadTask = pIRef.putStream(imageStream)
         return uploadTask
+    }
+
+    fun downloadImage(p: Product): Task<ByteArray> {
+        val storageRef = storage.reference
+        val pathRef = storageRef.child("images/${p.id}.png")
+
+        return pathRef.getBytes(1024*1024*10)
+    }
+
+    fun downloadImage_Small(p: Product): Task<ByteArray> {
+        val storageRef = storage.reference
+        val pathRef = storageRef.child("images/small/${p.id}_${SMALL}x${SMALL}.png")
+
+        return pathRef.getBytes(1024*1024*3)
     }
 }
