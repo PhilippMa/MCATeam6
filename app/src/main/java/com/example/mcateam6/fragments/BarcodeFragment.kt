@@ -21,47 +21,47 @@ private const val REQUEST_CODE_PERMISSIONS = 10
 private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
 class BarcodeFragment : Fragment() {
-    private lateinit var view_finder: TextureView
+    private lateinit var viewFinder: TextureView
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(R.layout.fragment_barcode, container, false);
-        view_finder = v.findViewById(R.id.view_finder)
+        viewFinder = v.findViewById(R.id.view_finder)
 
         if (allPermissionGranted()) {
-            view_finder.post{startCamera()}
+            viewFinder.post{startCamera()}
         } else {
             ActivityCompat.requestPermissions(
                 activity as MainActivity, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
             )
         }
-        view_finder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+        viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
             updateTransform()
         }
         return v
     }
 
     private fun startCamera(){
-        // Create configuration object for the view_finder use case
+        // Create configuration object for the viewFinder use case
         val previewConfig = PreviewConfig.Builder().apply {
             setTargetAspectRatio(Rational(1, 1))
             setTargetResolution(Size(640, 640))
         }.build()
 
-        // Build the view_finder use case
+        // Build the viewFinder use case
         val preview = Preview(previewConfig)
 
-        // Every time the view_finder is updated, recompute layout
+        // Every time the viewFinder is updated, recompute layout
         preview.setOnPreviewOutputUpdateListener {
 
             // To update the SurfaceTexture, we have to remove it and re-add it
-            val parent = view_finder.parent as ViewGroup
-            parent.removeView(view_finder)
-            parent.addView(view_finder, 0)
+            val parent = viewFinder.parent as ViewGroup
+            parent.removeView(viewFinder)
+            parent.addView(viewFinder, 0)
 
-            view_finder.surfaceTexture = it.surfaceTexture
+            viewFinder.surfaceTexture = it.surfaceTexture
             updateTransform()
         }
 
@@ -75,11 +75,11 @@ class BarcodeFragment : Fragment() {
         val matrix = Matrix()
 
         // Compute the center of the view finder
-        val centerX = view_finder.width / 2f
-        val centerY = view_finder.height / 2f
+        val centerX = viewFinder.width / 2f
+        val centerY = viewFinder.height / 2f
 
         // Correct preview output to account for display rotation
-        val rotationDegrees = when(view_finder.display.rotation) {
+        val rotationDegrees = when(viewFinder.display.rotation) {
             Surface.ROTATION_0 -> 0
             Surface.ROTATION_90 -> 90
             Surface.ROTATION_180 -> 180
@@ -89,7 +89,7 @@ class BarcodeFragment : Fragment() {
         matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
 
         // Finally, apply transformations to our TextureView
-        view_finder.setTransform(matrix)
+        viewFinder.setTransform(matrix)
     }
 
     override fun onRequestPermissionsResult(
@@ -99,7 +99,7 @@ class BarcodeFragment : Fragment() {
     ) {
         if (requestCode== REQUEST_CODE_PERMISSIONS){
             if (allPermissionGranted()) {
-                view_finder.post{ startCamera()}
+                viewFinder.post{ startCamera()}
             }
         }else {
             activity?.finish()
