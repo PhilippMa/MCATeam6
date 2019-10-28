@@ -71,19 +71,19 @@ class DatabaseInstrumentedTest {
      * @throws java.util.concurrent.TimeoutException If upload takes longer then the timeout set in the variables time and timeUnit
      * @see time, timeUnit
      */
-    @Test
+    /*@Test
     fun test_productUpload() {
         val prod = Product("TestProduct", "표본", "0123456789", "This is a description", emptyList(), emptyMap())
         val task = db.upload(prod)
         val res = Tasks.await(task, time, timeUnit)
         Log.i("FirebaseDatabase", "ID of document is: " + res.id)
         assertNotNull("Upload failed", res)
-    }
+    }*/
 
     @Test
     fun test_uploadDownload_basic() {
         val id = basicUpload()
-        val res = Tasks.await(db.getByID_Raw(id))
+        val res = Tasks.await(db.getByIdRaw(id))
         assertEquals("id of the downloaded document is different from the uploaded documents", id, res.id)
     }
 
@@ -96,9 +96,23 @@ class DatabaseInstrumentedTest {
     }
 
     @Test
+    fun test_uploadDownloadDetailed() {
+        val task = db.upload(ingre1, ingre2, prod)
+        val res = Tasks.await(task, time, timeUnit)
+        assertNotNull("Upload failed", res)
+        val pId: String = res[2]
+        val taskD = db.getProductById(pId)
+        val resD = Tasks.await(taskD, time, timeUnit)
+        val prodT = resD.toProduct()
+        val products = Tasks.await(resD.getIngredientProducts(), time, timeUnit)
+        assertFalse(products.isEmpty())
+        assertNotNull("Download failed", prodT)
+    }
+
+    @Test
     fun test_downloadBasic() {
         val id = "ocIj7Vfsvd3TeceqZjLR"
-        val res = Tasks.await(db.getByID_Raw(id))
+        val res = Tasks.await(db.getByIdRaw(id))
         assertEquals("id of the downloaded document is different from the uploaded documents", id, res.id)
     }
 
@@ -176,7 +190,7 @@ class DatabaseInstrumentedTest {
 
         Log.i("test_uploadDownloadSmallImage", "image upload successful")
 
-        val DLtask = db.downloadImage_Small(prod)
+        val DLtask = db.downloadImageSmall(prod)
         val DLres = Tasks.await(DLtask, time, timeUnit)
         Log.i("test_uploadDownloadSmallImage", "small image size: ${DLres.size}")
         assertNotEquals(res.bytesTransferred.toInt(), DLres.size)
