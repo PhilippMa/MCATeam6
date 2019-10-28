@@ -19,13 +19,42 @@ import kotlin.collections.HashMap
 
 class RemoteDatabase {
 
+    /**
+     * Use for download products from Firestore and convert them directly to this class. Contains
+     * Firestore compatible datatypes for all attributes. Use methods to compare to datatypes used
+     * in Product class.
+     */
     data class FirebaseProduct(
+        /**
+         * Remote id of the product
+         */
         var id: String = "",
+        /**
+         * English name of the product
+         */
         var name_english: String = "",
+        /**
+         * Korean name of the product
+         */
         var name_korean: String = "",
+        /**
+         * Optional description of the product
+         */
         var description: String = "",
+        /**
+         * Barcode of the product
+         */
         var barcode: String? = null,
+        /**
+         * List of references to the ingredients. Use getIngredientProducts() to get the ingredients
+         * as products
+         * @see DocumentReference
+         */
         var ingredients: List<DocumentReference> = emptyList(),
+        /**
+         * String, String map of the attributes (vegan, vegetarian). Use convertAttributes() to get
+         * a map of type Attribute, Boolean.
+         */
         var attributes: Map<String, String> = emptyMap()
     ) {
 
@@ -60,20 +89,12 @@ class RemoteDatabase {
             return aNew
         }
 
-        /**
-         * convert list of Strings referencing other documents to a list of products
-         * @see Product
-         * @return list of products (list<Product>)
-         */
-        /*private fun convertIngredients(): Task<List<Product>> {
-            val db = RemoteDatabase()
-            val list = Tasks.whenAllSuccess<Product>(ingredients.map { s ->
-                db.getProductById(s)
-                    .continueWith { task: Task<FirebaseProduct> -> task.result!!.toProduct() }
-            })
-            return list
-        }*/
 
+        /**
+         * Returns all ingredients of the current product. List of products will be returned as task
+         * as ingredients have to be downloaded first.
+         * @return A Task of a list of FirebaseProduct objects.
+         */
         fun getIngredientProducts(): Task<List<FirebaseProduct>> {
             return Tasks.whenAllSuccess(ingredients.map { documentReference ->
                 documentReference.get().continueWith { task: Task<DocumentSnapshot> ->
@@ -87,8 +108,17 @@ class RemoteDatabase {
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
     private val storage: FirebaseStorage = FirebaseStorage.getInstance()
 
+    /**
+     * Anonymous user identity needed for Firestore.
+     */
     private var user: FirebaseUser?
 
+    /**
+     * Resolution of the small images, which are created by the Firestore Extension in the
+     * Firebase console. Resolution is needed for downloading images, as the smaller resolution
+     * is written to filename. Change this variable, if image compression resolution is changed
+     * in the extension settings.
+     */
     private val small: Int = 1000
 
     val prodColl: CollectionReference
@@ -104,7 +134,11 @@ class RemoteDatabase {
         this.user = auth.currentUser
     }
 
-
+    /**
+     * Sign in anonymously to FirebaseAuthentication. Sign in is required to access and write
+     * products to the database. No user input or details are needed for the sign-in as an
+     * anonymous id is created by the authenticator.
+     */
     fun signIn(): Task<AuthResult> {
         return auth.signInAnonymously()
             .addOnCompleteListener { task ->
@@ -356,15 +390,6 @@ class RemoteDatabase {
         val pathRef = storageRef.child("images/small/${p.id}_${small}x${small}.png")
 
         return pathRef.getBytes(1024 * 1024 * 3)
-    }
-
-    fun getProductsFromReferences(reference: List<DocumentReference>): Task<List<Product>> {
-        val task = reference.map { documentReference ->
-            documentReference.get().continueWith { task: Task<DocumentSnapshot> ->
-                task.result!!.toObject(FirebaseProduct::class.java)!!.toProduct()
-            }
-        }
-        return Tasks.whenAllSuccess<Product>(task)
     }
 
     //TODO search
