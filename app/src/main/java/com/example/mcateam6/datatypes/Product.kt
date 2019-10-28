@@ -1,6 +1,8 @@
 package com.example.mcateam6.datatypes
 
 import com.example.mcateam6.database.RemoteDatabase
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentReference
 
 /**
@@ -12,9 +14,8 @@ import com.google.firebase.firestore.DocumentReference
  * @param ingredients List of Product Objects representing the ingredients of the current Product. Empty, if the product doesn't have any ingredients besides itself
  * @param attributes Map of attributes (vegetarian, vegan, ...) of the product. Should at least contain every attributes of the ingredients
  * @see Attribute
- * @author Alexander Kranzer
  */
-data class Product(
+open class Product(
     var id: String = "",
     var englishName: String = "",
     var koreanName: String = "",
@@ -24,6 +25,24 @@ data class Product(
     var attributes: Map<Attribute, Boolean> = emptyMap(),
     var document: DocumentReference?
 ) {
+    /*constructor(
+        englishName: String,
+        koreanName: String,
+        barcode: String?,
+        description: String,
+        ingredients: List<Product>,
+        attributes: Map<Attribute, Boolean>
+    ) : this("", englishName, koreanName, barcode, description, ingredients, attributes)
+*/
+    constructor(
+        id: String,
+        englishName: String,
+        koreanName: String,
+        barcode: String?,
+        description: String,
+        attributes: Map<Attribute, Boolean>
+    ) : this(id, englishName, koreanName, barcode, description, emptyList(), attributes, null)
+
 
     constructor(englishName: String, koreanName: String, barcode: String?, description: String, ingredients: List<Product>, attributes: Map<Attribute, Boolean>) : this("", englishName, koreanName, barcode, description, ingredients, attributes, null)
 
@@ -39,7 +58,7 @@ data class Product(
      * @param db RemoteDatabase object
      * @return id of the created document
      */
-    fun createDocument(db: RemoteDatabase) : String {
+    fun createDocument(db: RemoteDatabase): String {
         val doc = db.prodColl.document()
         document = doc
         id = doc.id
