@@ -1,0 +1,56 @@
+{
+  "project_info": {
+    "project_number": "668467593311",
+    "firebase_url": "https://mcateam6-bacc0.firebaseio.com",
+    "project_id": "mcateam6-bacc0",
+    "storage_bucket": "mcateam6-bacc0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:668467593311:android:9a182a9189c926b8675bea",
+        "android_client_info": {
+          "package_name": "com.example.mcateam6"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "668467593311-1lkevkipn0n83pv8otc8471gj0i2u82r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mcateam6",
+            "certificate_hash": "73b71084a38e3ae458b2b5464a9395655858730f"
+          }
+        },
+        {
+          "client_id": "668467593311-2vs5c1e2ql5akgfipp4l0t6e7kqo03i1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.mcateam6",
+            "certificate_hash": "a47c7c756655f46bf1e8b5d28e0ca05fdb4dd455"
+          }
+        },
+        {
+          "client_id": "668467593311-r88a5bpiiqgo5g6armfm83kvd8bea7r1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8ZZCSSwt_09DlUtmttdV5-Lg4OEk4Xl0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "668467593311-r88a5bpiiqgo5g6armfm83kvd8bea7r1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
