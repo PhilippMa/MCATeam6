@@ -156,6 +156,14 @@ class DatabaseInstrumentedTest {
     }
 
     @Test
+    fun test_getProductByBarcodeNoIngredients() {
+        val task = db.getProductByBarcode("0123456789")
+        val res = Tasks.await(task, time, timeUnit)
+        Log.i(this.javaClass.name, "Product: $res")
+        assertTrue("products not identical", Product.equals(prod, res))
+    }
+
+    @Test
     fun test_uploadImage() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val image = context.resources.openRawResource(R.raw.firework)
@@ -194,5 +202,12 @@ class DatabaseInstrumentedTest {
         val DLres = Tasks.await(DLtask, time, timeUnit)
         Log.i("test_uploadDownloadSmallImage", "small image size: ${DLres.size}")
         assertNotEquals(res.bytesTransferred.toInt(), DLres.size)
+    }
+
+    @Test
+    fun test_englishSearch() {
+        val task = db.searchEnglish("Test", true);
+        val res = Tasks.await(task);
+        assertTrue(res.all { firebaseProduct -> firebaseProduct.name_english.contains("Test", true) })
     }
 }

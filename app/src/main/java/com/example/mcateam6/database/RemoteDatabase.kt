@@ -50,7 +50,7 @@ class RemoteDatabase {
          * as products
          * @see DocumentReference
          */
-        var ingredients: List<DocumentReference> = emptyList(),
+        var ingredients: List<DocumentReference?> = emptyList(),
         /**
          * String, String map of the attributes (vegan, vegetarian). Use convertAttributes() to get
          * a map of type Attribute, Boolean.
@@ -97,7 +97,7 @@ class RemoteDatabase {
          */
         fun getIngredientProducts(): Task<List<FirebaseProduct>> {
             return Tasks.whenAllSuccess(ingredients.map { documentReference ->
-                documentReference.get().continueWith { task: Task<DocumentSnapshot> ->
+                documentReference!!.get().continueWith { task: Task<DocumentSnapshot> ->
                     task.result!!.toObject(FirebaseProduct::class.java)
                 }
             })
@@ -392,5 +392,73 @@ class RemoteDatabase {
         return pathRef.getBytes(1024 * 1024 * 3)
     }
 
-    //TODO search
+    /**
+     * Search the entire Product collection for a product which contains the given string
+     * in the english name.
+     * @param s search string
+     * @param ignoreCase if set to true, case is ignore while searching (default value is true)
+     * @return a task of a list of FirebaseProducts which contain the search string in their english
+     * name
+     * @see Task
+     * @see FirebaseProduct
+     */
+    fun searchEnglish(s: String, ignoreCase: Boolean = true): Task<List<FirebaseProduct>> {
+        val list = prodColl.get()
+            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java) }
+
+        return list.continueWith { task: Task<MutableList<FirebaseProduct>> ->
+            task.result!!.filter { firebaseProduct ->
+                firebaseProduct.name_english.contains(
+                    s,
+                    ignoreCase
+                )
+            }
+        }
+    }
+
+    /**
+     * Search the entire Product collection for a product which contains the given string
+     * in the korean name.
+     * @param s search string
+     * @param ignoreCase if set to true, case is ignore while searching (default value is true)
+     * @return a task of a list of FirebaseProducts which contain the search string in their korean
+     * name
+     * @see Task
+     * @see FirebaseProduct
+     */
+    fun searchKorean(s: String, ignoreCase: Boolean = true): Task<List<FirebaseProduct>> {
+        val list = prodColl.get()
+            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java) }
+
+        return list.continueWith { task: Task<MutableList<FirebaseProduct>> ->
+            task.result!!.filter { firebaseProduct ->
+                firebaseProduct.name_korean.contains(
+                    s,
+                    ignoreCase
+                )
+            }
+        }
+    }
+
+    /**
+     * Search the entire Product collection for a product which contains the given string
+     * in either the korean name or the english name.
+     * @param s search string
+     * @param ignoreCase if set to true, case is ignore while searching (default value is true)
+     * @return a task of a list of FirebaseProducts which contain the search string in their korean
+     * or english name
+     * @see Task
+     * @see FirebaseProduct
+     */
+    fun searchAll(s: String, ignoreCase: Boolean = true): Task<List<FirebaseProduct>> {
+        val list = prodColl.get()
+            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java) }
+
+        return list.continueWith { task: Task<MutableList<FirebaseProduct>> ->
+            task.result!!.filter { firebaseProduct ->
+                firebaseProduct.name_korean.contains(s, ignoreCase)
+                        || firebaseProduct.name_english.contains(s, ignoreCase)
+            }
+        }
+    }
 }
