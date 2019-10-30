@@ -3,8 +3,12 @@
     <string name="title_search">Search</string>
     <string name="title_barcode">Barcode</string>
     <string name="title_setting">Settings</string>
-
-
+    <string name="english_name">English Name</string>
+    <string name="korean_name">Korean Name</string>
+    <string name="description">Description</string>
+    <string name="ingredients">Ingredients</string>
+    <string name="add">Add</string>
+    <string name="ingredient">Ingredient</string>
     <string name="entry_java_title">Java</string>
     <string name="entry_java_subtitle">Run the MLKit Showcase written in Java.</string>
     <string name="entry_kotlin_title">Kotlin</string>

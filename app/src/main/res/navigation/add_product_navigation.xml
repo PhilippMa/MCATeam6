@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/add_product_navigation"
+    app:startDestination="@id/productGeneralInformationFragment">
+
+    <fragment
+        android:id="@+id/productGeneralInformationFragment"
+        android:name="com.example.mcateam6.fragments.ProductGeneralInformationFragment"
+        android:label="fragment_product_general_information"
+        tools:layout="@layout/fragment_product_general_information" >
+        <action
+            android:id="@+id/action_productGeneralInformationFragment_to_productDescriptionFragment"
+            app:destination="@id/productDescriptionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/productDescriptionFragment"
+        android:name="com.example.mcateam6.fragments.ProductDescriptionFragment"
+        android:label="fragment_product_description"
+        tools:layout="@layout/fragment_product_description" >
+        <action
+            android:id="@+id/action_productDescriptionFragment_to_productIngredientsFragment"
+            app:destination="@id/productIngredientsFragment" />
+        <action
+            android:id="@+id/action_productDescriptionFragment_to_productGeneralInformationFragment"
+            app:destination="@id/productGeneralInformationFragment"
+            app:popUpTo="@+id/productGeneralInformationFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/productIngredientsFragment"
+        android:name="com.example.mcateam6.fragments.ProductIngredientsFragment"
+        android:label="fragment_product_ingredients"
+        tools:layout="@layout/fragment_product_ingredients" >
+        <action
+            android:id="@+id/action_productIngredientsFragment_to_productDietInformationFragment"
+            app:destination="@id/productDietInformationFragment" />
+        <action
+            android:id="@+id/action_productIngredientsFragment_to_productDescriptionFragment"
+            app:destination="@id/productDescriptionFragment"
+            app:popUpTo="@+id/productDescriptionFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/productDietInformationFragment"
+        android:name="com.example.mcateam6.fragments.AttributesFragment"
+        android:label="fragment_product_diet_information"
+        tools:layout="@layout/fragment_product_attributes" >
+        <action
+            android:id="@+id/action_productDietInformationFragment_to_productIngredientsFragment"
+            app:destination="@id/productIngredientsFragment"
+            app:popUpTo="@+id/productDietInformationFragment" />
+    </fragment>
+</navigation>
