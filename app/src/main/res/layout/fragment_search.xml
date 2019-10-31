@@ -6,8 +6,8 @@
     android:layout_height="match_parent">
     <com.mancj.materialsearchbar.MaterialSearchBar
         style="@style/MaterialSearchBarLight"
-        app:mt_hint="Custom hint"
         app:mt_maxSuggestionsCount="10"
+        app:mt_hint="ALL"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/searchBar" />
