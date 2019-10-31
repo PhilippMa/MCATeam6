@@ -5,10 +5,13 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ListView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import com.example.mcateam6.R
+import com.example.mcateam6.activities.MainActivity
+import com.example.mcateam6.adapters.SearchItemListAdapter
 import com.example.mcateam6.database.RemoteDatabase
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
@@ -22,7 +25,11 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     private val ITEM_KOREAN = 1
     private val ITEM_ENGLISH = 2
 
+    var itemList: List<RemoteDatabase.FirebaseProduct>? = mutableListOf()
+    lateinit var itemListAdapter: SearchItemListAdapter
+
     var itemIndex = 0
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -34,6 +41,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         searchBar.setOnSearchActionListener(this)
         searchBar.inflateMenu(R.menu.search_item_menu)
         searchBar.menu.setOnMenuItemClickListener(this)
+
+        val listView = v.findViewById<ListView>(R.id.list_view)
+        itemListAdapter = SearchItemListAdapter(context, itemList)
+        listView.adapter = itemListAdapter
 
         return v
     }
@@ -79,16 +90,12 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                 task = db.searchEnglish(text.toString())
             }
         }
-        task?.addOnCompleteListener(object: OnCompleteListener<List<RemoteDatabase.FirebaseProduct>> {
-            override fun onComplete(t: Task<List<RemoteDatabase.FirebaseProduct>>) {
-                if (t.isSuccessful) {
-                    val res = t.result
-                    res?.forEach { print(it) }
-                } else {
-
-                }
+        task?.addOnCompleteListener{
+            if (it.isSuccessful) {
+                itemListAdapter.updateWholeData(it.result)
+            } else {
+                Toast.makeText(context, "Fail to load search list", Toast.LENGTH_SHORT)
             }
-
-        })
+        }
     }
 }
