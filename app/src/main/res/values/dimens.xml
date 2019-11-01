@@ -3,6 +3,7 @@
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="form_outer_margin">20dp</dimen>
+    <dimen name="form_large_margin">50dp</dimen>
     <dimen name="home_page_title_size">18sp</dimen>
     <dimen name="home_page_title_padding_top">32dp</dimen>
     <dimen name="home_page_title_padding_bottom">16dp</dimen>
