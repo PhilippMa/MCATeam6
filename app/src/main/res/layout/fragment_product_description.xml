@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/form_outer_margin"
+        android:layout_marginTop="@dimen/form_large_margin"
         android:layout_marginEnd="@dimen/form_outer_margin"
         android:hint="@string/description_optional"
         app:hintAnimationEnabled="true"
