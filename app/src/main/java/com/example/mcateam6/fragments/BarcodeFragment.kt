@@ -2,111 +2,203 @@ package com.example.mcateam6.fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
-import com.example.mcateam6.R
-import android.Manifest
-import android.content.pm.PackageManager
-import android.graphics.Matrix
-import android.util.Rational
-import android.util.Size
 import android.view.*
-import androidx.camera.core.CameraX
-import androidx.camera.core.Preview
-import androidx.camera.core.PreviewConfig
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import com.example.mcateam6.activities.MainActivity
+import android.animation.AnimatorInflater
+import android.animation.AnimatorSet
+import android.content.Intent
+import android.hardware.Camera
+import android.util.Log
+import android.view.View
+import android.view.View.OnClickListener
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
+import com.google.android.material.chip.Chip
+import com.google.common.base.Objects
+import com.example.mcateam6.R
+import com.example.mcateam6.kotlin.camera.GraphicOverlay
+import com.example.mcateam6.kotlin.camera.WorkflowModel
+import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
+import com.example.mcateam6.kotlin.barcodedetection.BarcodeField
+import com.example.mcateam6.kotlin.barcodedetection.BarcodeProcessor
+import com.example.mcateam6.kotlin.barcodedetection.BarcodeResultFragment
+import com.example.mcateam6.kotlin.camera.CameraSource
+import com.example.mcateam6.kotlin.camera.CameraSourcePreview
+import com.example.mcateam6.kotlin.settings.SettingsActivity
+import java.io.IOException
+import java.util.ArrayList
 
-private const val REQUEST_CODE_PERMISSIONS = 10
 
-private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
+class BarcodeFragment : Fragment(), OnClickListener {
 
-class BarcodeFragment : Fragment() {
-    private lateinit var viewFinder: TextureView
+    private var cameraSource: CameraSource? = null
+    private var preview: CameraSourcePreview? = null
+    private var graphicOverlay: GraphicOverlay? = null
+    private var settingsButton: View? = null
+    private var flashButton: View? = null
+    private var promptChip: Chip? = null
+    private var promptChipAnimator: AnimatorSet? = null
+    private var workflowModel: WorkflowModel? = null
+    private var currentWorkflowState: WorkflowState? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val v = inflater.inflate(R.layout.fragment_barcode, container, false);
-        viewFinder = v.findViewById(R.id.view_finder)
 
-        if (allPermissionGranted()) {
-            viewFinder.post{startCamera()}
-        } else {
-            ActivityCompat.requestPermissions(
-                activity as MainActivity, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
+        val v = inflater.inflate(R.layout.activity_live_barcode_kotlin, container, false)
+
+        preview = v.findViewById(R.id.camera_preview)
+        graphicOverlay = v.findViewById<GraphicOverlay>(R.id.camera_preview_graphic_overlay)
+            .apply {
+                setOnClickListener(this@BarcodeFragment)
+                cameraSource = CameraSource(this)
+            }
+
+        promptChip = v.findViewById(R.id.bottom_prompt_chip)
+        promptChipAnimator =
+            (AnimatorInflater.loadAnimator(activity, R.animator.bottom_prompt_chip_enter) as AnimatorSet).apply {
+                setTarget(promptChip)
+            }
+
+/*        view?.findViewById<View>(R.id.close_button)?.setOnClickListener(this)
+        flashButton = view?.findViewById<View>(R.id.flash_button)?.apply {
+            setOnClickListener(@LiveBarcodeScanningActivity)
         }
-        viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            updateTransform()
-        }
+        settingsButton = view?.findViewById<View>(R.id.settings_button)?.apply {
+            setOnClickListener(this@LiveBarcodeScanningActivity)
+        }*/
+
+
+        setUpWorkflowModel()
+
         return v
     }
 
-    private fun startCamera(){
-        // Create configuration object for the viewFinder use case
-        val previewConfig = PreviewConfig.Builder().apply {
-            setTargetAspectRatio(Rational(1, 1))
-            setTargetResolution(Size(640, 640))
-        }.build()
+    override fun onResume() {
+        super.onResume()
 
-        // Build the viewFinder use case
-        val preview = Preview(previewConfig)
-
-        // Every time the viewFinder is updated, recompute layout
-        preview.setOnPreviewOutputUpdateListener {
-
-            // To update the SurfaceTexture, we have to remove it and re-add it
-            val parent = viewFinder.parent as ViewGroup
-            parent.removeView(viewFinder)
-            parent.addView(viewFinder, 0)
-
-            viewFinder.surfaceTexture = it.surfaceTexture
-            updateTransform()
-        }
-
-        // Bind use cases to lifecycle
-        // If Android Studio complains about "this" being not a LifecycleOwner
-        // try rebuilding the project or updating the appcompat dependency to
-        // version 1.1.0 or higher.
-        CameraX.bindToLifecycle(this, preview)
-    }
-    private fun updateTransform(){
-        val matrix = Matrix()
-
-        // Compute the center of the view finder
-        val centerX = viewFinder.width / 2f
-        val centerY = viewFinder.height / 2f
-
-        // Correct preview output to account for display rotation
-        val rotationDegrees = when(viewFinder.display.rotation) {
-            Surface.ROTATION_0 -> 0
-            Surface.ROTATION_90 -> 90
-            Surface.ROTATION_180 -> 180
-            Surface.ROTATION_270 -> 270
-            else -> return
-        }
-        matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
-
-        // Finally, apply transformations to our TextureView
-        viewFinder.setTransform(matrix)
+        workflowModel?.markCameraFrozen()
+        settingsButton?.isEnabled = true
+        currentWorkflowState = WorkflowState.NOT_STARTED
+        cameraSource?.setFrameProcessor(BarcodeProcessor(graphicOverlay!!, workflowModel!!))
+        workflowModel?.setWorkflowState(WorkflowState.DETECTING)
     }
 
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if (requestCode== REQUEST_CODE_PERMISSIONS){
-            if (allPermissionGranted()) {
-                viewFinder.post{ startCamera()}
+    override fun onPause() {
+        super.onPause()
+        currentWorkflowState = WorkflowState.NOT_STARTED
+        stopCameraPreview()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        cameraSource?.release()
+        cameraSource = null
+    }
+
+    override fun onClick(view: View) {
+/*        when (view.id) {
+            R.id.close_button -> onBackPressed()
+            R.id.flash_button -> {
+                flashButton?.let {
+                    if (it.isSelected) {
+                        it.isSelected = false
+                        cameraSource?.updateFlashMode(Camera.Parameters.FLASH_MODE_OFF)
+                    } else {
+                        it.isSelected = true
+                        cameraSource!!.updateFlashMode(Camera.Parameters.FLASH_MODE_TORCH)
+                    }
+                }
             }
-        }else {
-            activity?.finish()
+            R.id.settings_button -> {
+                settingsButton?.isEnabled = false
+                startActivity(Intent(this, SettingsActivity::class.java))
+            }
+        }*/
+    }
+
+
+    private fun startCameraPreview() {
+        val workflowModel = this.workflowModel ?: return
+        val cameraSource = this.cameraSource ?: return
+        if (!workflowModel.isCameraLive) {
+            try {
+                workflowModel.markCameraLive()
+                preview?.start(cameraSource)
+            } catch (e: IOException) {
+                Log.e(TAG, "Failed to start camera preview!", e)
+                cameraSource.release()
+                this.cameraSource = null
+            }
         }
     }
-    private fun allPermissionGranted() = REQUIRED_PERMISSIONS.all{
-        ContextCompat.checkSelfPermission(
-            activity as MainActivity, it) == PackageManager.PERMISSION_GRANTED
+
+    private fun stopCameraPreview() {
+        val workflowModel = this.workflowModel ?: return
+        if (workflowModel.isCameraLive) {
+            workflowModel.markCameraFrozen()
+            flashButton?.isSelected = false
+            preview?.stop()
+        }
     }
+
+    private fun setUpWorkflowModel() {
+        workflowModel = ViewModelProviders.of(this).get(WorkflowModel::class.java)
+
+        // Observes the workflow state changes, if happens, update the overlay view indicators and
+        // camera preview state.
+        workflowModel!!.workflowState.observe(this, Observer { workflowState ->
+            if (workflowState == null || Objects.equal(currentWorkflowState, workflowState)) {
+                return@Observer
+            }
+
+            currentWorkflowState = workflowState
+            Log.d(TAG, "Current workflow state: ${currentWorkflowState!!.name}")
+
+            val wasPromptChipGone = promptChip?.visibility == View.GONE
+
+            when (workflowState) {
+                WorkflowState.DETECTING -> {
+                    promptChip?.visibility = View.VISIBLE
+                    promptChip?.setText(R.string.prompt_point_at_a_barcode)
+                    startCameraPreview()
+                }
+                WorkflowState.CONFIRMING -> {
+                    promptChip?.visibility = View.VISIBLE
+                    promptChip?.setText(R.string.prompt_move_camera_closer)
+                    startCameraPreview()
+                }
+                WorkflowState.SEARCHING -> {
+                    promptChip?.visibility = View.VISIBLE
+                    promptChip?.setText(R.string.prompt_searching)
+                    stopCameraPreview()
+                }
+                WorkflowState.DETECTED, WorkflowState.SEARCHED -> {
+                    promptChip?.visibility = View.GONE
+                    stopCameraPreview()
+                }
+                else -> promptChip?.visibility = View.GONE
+            }
+
+            val shouldPlayPromptChipEnteringAnimation = wasPromptChipGone && promptChip?.visibility == View.VISIBLE
+            promptChipAnimator?.let {
+                if (shouldPlayPromptChipEnteringAnimation && !it.isRunning) it.start()
+            }
+        })
+
+        workflowModel?.detectedBarcode?.observe(this, Observer { barcode ->
+            if (barcode != null) {
+                val barcodeFieldList = ArrayList<BarcodeField>()
+                barcodeFieldList.add(BarcodeField("Raw Value", barcode.rawValue ?: ""))
+                BarcodeResultFragment.show(fragmentManager!!, barcodeFieldList)
+            }
+        })
+    }
+
+    companion object {
+        private const val TAG = "LiveBarcodeActivity"
+    }
+
 }
