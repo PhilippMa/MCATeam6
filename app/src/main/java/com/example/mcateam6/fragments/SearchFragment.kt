@@ -10,10 +10,8 @@ import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
 import com.example.mcateam6.R
-import com.example.mcateam6.activities.MainActivity
 import com.example.mcateam6.adapters.SearchItemListAdapter
 import com.example.mcateam6.database.RemoteDatabase
-import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.mancj.materialsearchbar.MaterialSearchBar
 import kotlinx.android.synthetic.main.fragment_search.*
