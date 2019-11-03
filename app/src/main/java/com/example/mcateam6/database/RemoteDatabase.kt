@@ -226,13 +226,19 @@ class RemoteDatabase {
         attributes: Map<Attribute, Boolean>
     ): Task<DocumentReference> {
 
+        // Map attribute map to a <String, String> map for compatibility with the firestore datatypes
+        val stringAttributes: HashMap<String, String> = HashMap()
+        attributes.onEach { entry ->
+            stringAttributes[entry.key.toString()] = entry.value.toString()
+        }
+
         val productMap: HashMap<String, Any> = HashMap()
         productMap["name_english"] = englishName
         productMap["name_korean"] = koreanName
         productMap["barcode"] = barcode.orEmpty()
         productMap["description"] = description
         productMap["ingredients"] = ingredients
-        productMap["attributes"] = attributes
+        productMap["attributes"] = stringAttributes
 
         return prodColl
             .add(productMap)

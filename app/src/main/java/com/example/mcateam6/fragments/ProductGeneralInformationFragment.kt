@@ -30,6 +30,7 @@ class ProductGeneralInformationFragment : AddProductFormPageFragment() {
 
         enNameEdit.setText(productModel.englishName)
         krNameEdit.setText(productModel.koreanName)
+        updateModels(enNameEdit, krNameEdit)
 
         addFormListener(enNameEdit)
         addFormListener(krNameEdit)
@@ -37,10 +38,10 @@ class ProductGeneralInformationFragment : AddProductFormPageFragment() {
         return v
     }
 
-    private fun updateModels() {
-        pagedFormModel.setIsValid(formPage, en_name_edit.text.toString().isNotBlank() && kr_name_edit.text.toString().isNotBlank())
-        productModel.englishName = en_name_edit.text.toString()
-        productModel.koreanName = kr_name_edit.text.toString()
+    private fun updateModels(enNameEditText: EditText = en_name_edit, krNameEditText: EditText = kr_name_edit) {
+        pagedFormModel.setIsValid(formPage, enNameEditText.text.toString().isNotBlank() && krNameEditText.text.toString().isNotBlank())
+        productModel.englishName = enNameEditText.text.toString()
+        productModel.koreanName = krNameEditText.text.toString()
     }
 
     private fun addFormListener(editText: EditText) {

@@ -86,10 +86,18 @@ class AddProductActivity : AppCompatActivity() {
         }
 
         create_button.setOnClickListener {
-            uploadProduct().addOnSuccessListener {
-                finish()
-            }.addOnFailureListener {
-                Toast.makeText(this, "Unable to upload product to database.\n Please try again!", Toast.LENGTH_SHORT).show()
+            val db = RemoteDatabase()
+            
+            db.signIn().addOnSuccessListener {
+                uploadProduct(db).addOnSuccessListener {
+                    finish()
+                }.addOnFailureListener {
+                    Toast.makeText(
+                        this,
+                        "Unable to upload product to database.\n Please try again!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
             }
         }
 
@@ -104,9 +112,7 @@ class AddProductActivity : AppCompatActivity() {
         navController.navigate(pagedFormModel.currentPage.value!!.previousNavAction()!!)
     }
 
-    private fun uploadProduct(): Task<DocumentReference> {
-        val db = RemoteDatabase().apply { signIn() }
-
+    private fun uploadProduct(db: RemoteDatabase): Task<DocumentReference> {
         return db.upload(
             productModel.englishName,
             productModel.koreanName,
