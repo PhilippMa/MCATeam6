@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.findNavController
 import androidx.navigation.ui.setupWithNavController
 import com.example.mcateam6.R
+import com.example.mcateam6.kotlin.Utils
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,6 +27,10 @@ class MainActivity : AppCompatActivity() {
             addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
             decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
             statusBarColor = Color.TRANSPARENT
+        }
+
+        if (!Utils.allPermissionsGranted(this)) {
+            Utils.requestRuntimePermissions(this)
         }
     }
 }
