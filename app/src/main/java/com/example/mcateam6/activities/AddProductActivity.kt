@@ -101,6 +101,8 @@ class AddProductActivity : AppCompatActivity() {
             }
         }
 
+        close_button.setOnClickListener { finish() }
+
         setFullScreen()
     }
 

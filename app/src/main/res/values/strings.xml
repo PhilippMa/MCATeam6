@@ -15,6 +15,7 @@
     <string name="vegan">Vegan</string>
     <string name="vegetarian">Vegetarian</string>
     <string name="none">None</string>
+    <string name="close_button">Close button</string>
     <string name="entry_java_title">Java</string>
     <string name="entry_java_subtitle">Run the MLKit Showcase written in Java.</string>
     <string name="entry_kotlin_title">Kotlin</string>
