@@ -226,13 +226,20 @@ class RemoteDatabase {
         attributes: Map<Attribute, Boolean>
     ): Task<DocumentReference> {
 
+        // Map attribute map to a <String, String> map for compatibility with the firestore datatypes
+        val stringAttributes: HashMap<String, String> = HashMap()
+        attributes.onEach { entry ->
+            stringAttributes[entry.key.toString()] = entry.value.toString()
+        }
+
         val productMap: HashMap<String, Any> = HashMap()
         productMap["name_english"] = englishName
         productMap["name_korean"] = koreanName
         productMap["barcode"] = barcode.orEmpty()
         productMap["description"] = description
-        productMap["ingredients"] = ingredients
-        productMap["attributes"] = attributes
+        productMap["ingredients"] =
+            ingredients.map { product -> db.document("/products/${product.id}") }
+        productMap["attributes"] = stringAttributes
 
         return prodColl
             .add(productMap)
@@ -296,7 +303,13 @@ class RemoteDatabase {
     fun getProductByEnglishName(name: String): Task<FirebaseProduct> {
         val query = prodColl.whereEqualTo("name_english", name).limit(1)
         return query.get()
-            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java)[0] }
+            .continueWith { task: Task<QuerySnapshot> ->
+                val doc = task.result!!.documents[0]
+                val obj = doc.toObject(FirebaseProduct::class.java)
+                obj!!.id = doc.id
+                obj
+            }
+
     }
 
     /**
@@ -311,8 +324,12 @@ class RemoteDatabase {
     fun getProductByKoreanName(name: String): Task<FirebaseProduct> {
         val query = prodColl.whereEqualTo("name_korean", name).limit(1)
         return query.get()
-            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java)[0] }
-    }
+            .continueWith { task: Task<QuerySnapshot> ->
+                val doc = task.result!!.documents[0]
+                val obj = doc.toObject(FirebaseProduct::class.java)
+                obj!!.id = doc.id
+                obj
+            }    }
 
     /**
      * Returns a product for a specific barcode. If more than one product exists with the same
@@ -325,8 +342,12 @@ class RemoteDatabase {
     fun getProductByBarcode(barcode: String): Task<FirebaseProduct> {
         val query = prodColl.whereEqualTo("barcode", barcode).limit(1)
         return query.get()
-            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java)[0] }
-    }
+            .continueWith { task: Task<QuerySnapshot> ->
+                val doc = task.result!!.documents[0]
+                val obj = doc.toObject(FirebaseProduct::class.java)
+                obj!!.id = doc.id
+                obj
+            }    }
 
     /**
      * Upload an image for a specific product. Only one image per product can be uploaded,

@@ -1,8 +1,6 @@
 package com.example.mcateam6.datatypes
 
 import com.example.mcateam6.database.RemoteDatabase
-import com.google.android.gms.tasks.Task
-import com.google.android.gms.tasks.Tasks
 import com.google.firebase.firestore.DocumentReference
 
 /**
