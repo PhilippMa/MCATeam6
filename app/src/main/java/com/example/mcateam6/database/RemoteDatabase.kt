@@ -237,7 +237,8 @@ class RemoteDatabase {
         productMap["name_korean"] = koreanName
         productMap["barcode"] = barcode.orEmpty()
         productMap["description"] = description
-        productMap["ingredients"] = ingredients
+        productMap["ingredients"] =
+            ingredients.map { product -> db.document("/products/${product.id}") }
         productMap["attributes"] = stringAttributes
 
         return prodColl
