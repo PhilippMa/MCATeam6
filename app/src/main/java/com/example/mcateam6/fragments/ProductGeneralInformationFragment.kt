@@ -27,21 +27,32 @@ class ProductGeneralInformationFragment : AddProductFormPageFragment() {
 
         val enNameEdit: EditText = v.findViewById(R.id.en_name_edit)
         val krNameEdit: EditText = v.findViewById(R.id.kr_name_edit)
+        val barcodeEdit: EditText = v.findViewById(R.id.barcode_edit)
 
         enNameEdit.setText(productModel.englishName)
         krNameEdit.setText(productModel.koreanName)
-        updateModels(enNameEdit, krNameEdit)
+        barcodeEdit.setText(productModel.barcode)
+        updateModels(enNameEdit, krNameEdit, barcodeEdit)
 
         addFormListener(enNameEdit)
         addFormListener(krNameEdit)
+        addFormListener(barcodeEdit)
 
         return v
     }
 
-    private fun updateModels(enNameEditText: EditText = en_name_edit, krNameEditText: EditText = kr_name_edit) {
-        pagedFormModel.setIsValid(formPage, enNameEditText.text.toString().isNotBlank() && krNameEditText.text.toString().isNotBlank())
+    private fun updateModels(
+        enNameEditText: EditText = en_name_edit,
+        krNameEditText: EditText = kr_name_edit,
+        barcodeEditText: EditText = barcode_edit
+    ) {
+        pagedFormModel.setIsValid(
+            formPage,
+            enNameEditText.text.toString().isNotBlank() && krNameEditText.text.toString().isNotBlank()
+        )
         productModel.englishName = enNameEditText.text.toString()
         productModel.koreanName = krNameEditText.text.toString()
+        productModel.barcode = barcodeEditText.text.toString()
     }
 
     private fun addFormListener(editText: EditText) {

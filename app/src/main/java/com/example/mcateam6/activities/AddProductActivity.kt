@@ -118,7 +118,7 @@ class AddProductActivity : AppCompatActivity() {
         return db.upload(
             productModel.englishName,
             productModel.koreanName,
-            null,
+            if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
             productModel.description,
             productModel.ingredients,
             productModel.attributes

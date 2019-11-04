@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/form_outer_margin"
         android:layout_marginEnd="@dimen/form_outer_margin"
-        android:hint="@string/description"
+        android:hint="@string/description_optional"
         app:hintAnimationEnabled="true"
         app:hintEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
