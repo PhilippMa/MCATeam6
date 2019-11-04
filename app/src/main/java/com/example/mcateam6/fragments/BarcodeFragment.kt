@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.google.android.material.chip.Chip
 import com.google.common.base.Objects
 import com.example.mcateam6.R
+import com.example.mcateam6.activities.AddProductActivity
 import com.example.mcateam6.kotlin.camera.GraphicOverlay
 import com.example.mcateam6.kotlin.camera.WorkflowModel
 import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
@@ -25,6 +26,7 @@ import com.example.mcateam6.kotlin.barcodedetection.BarcodeResultFragment
 import com.example.mcateam6.kotlin.camera.CameraSource
 import com.example.mcateam6.kotlin.camera.CameraSourcePreview
 import com.example.mcateam6.kotlin.settings.SettingsActivity
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.IOException
 import java.util.ArrayList
 
@@ -69,6 +71,11 @@ class BarcodeFragment : Fragment(), OnClickListener {
         settingsButton = view?.findViewById<View>(R.id.settings_button)?.apply {
             setOnClickListener(this@LiveBarcodeScanningActivity)
         }*/
+
+        v.findViewById<FloatingActionButton>(R.id.add_product_button).setOnClickListener {
+            val intent = Intent().setClass(context!!, AddProductActivity::class.java)
+            startActivity(intent)
+        }
 
 
         setUpWorkflowModel()
