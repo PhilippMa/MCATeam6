@@ -10,14 +10,24 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/text_name"
+            android:id="@+id/text_english_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="name"
+            android:text="english name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_korean_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="korean name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_english_name" />
 
         <ImageView
             android:id="@+id/view_image"
@@ -28,7 +38,7 @@
             android:layout_marginEnd="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_name"
+            app:layout_constraintTop_toBottomOf="@+id/text_korean_name"
             tools:srcCompat="@tools:sample/backgrounds/scenic" />
 
         <TextView
