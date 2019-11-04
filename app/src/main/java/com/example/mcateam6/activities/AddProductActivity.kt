@@ -16,6 +16,7 @@ import androidx.navigation.NavDirections
 import androidx.navigation.findNavController
 import com.example.mcateam6.R
 import com.example.mcateam6.database.RemoteDatabase
+import com.example.mcateam6.datatypes.Product
 import com.example.mcateam6.fragments.ProductDescriptionFragmentDirections
 import com.example.mcateam6.fragments.ProductGeneralInformationFragmentDirections
 import com.example.mcateam6.fragments.ProductIngredientsFragmentDirections
@@ -114,14 +115,16 @@ class AddProductActivity : AppCompatActivity() {
         navController.navigate(pagedFormModel.currentPage.value!!.previousNavAction()!!)
     }
 
-    private fun uploadProduct(db: RemoteDatabase): Task<DocumentReference> {
+    private fun uploadProduct(db: RemoteDatabase): Task<List<String>> {
         return db.upload(
-            productModel.englishName,
-            productModel.koreanName,
-            if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
-            productModel.description,
-            productModel.ingredients,
-            productModel.attributes
+            Product(
+                productModel.englishName,
+                productModel.koreanName,
+                if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
+                productModel.description,
+                productModel.ingredients,
+                productModel.attributes
+            )
         )
     }
 
