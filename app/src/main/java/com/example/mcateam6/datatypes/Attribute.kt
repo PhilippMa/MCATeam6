@@ -9,11 +9,11 @@ package com.example.mcateam6.datatypes
  */
 enum class Attribute {
     /**
-     * Attribute key for a vegan product
+     * Attribute id for a vegan product
      */
     VEGAN,
     /**
-     * Attribute key for a vegetarian product
+     * Attribute id for a vegetarian product
      */
     VEGETARIAN
 }
