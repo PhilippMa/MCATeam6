@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/form_outer_margin"
+        android:layout_marginTop="@dimen/form_outer_margin"
         android:layout_marginEnd="@dimen/form_outer_margin"
         android:hint="@string/description_optional"
         app:hintAnimationEnabled="true"
@@ -19,7 +20,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/desctiption_text">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/description_edit"
@@ -32,5 +33,19 @@
             android:maxLength="200" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/desctiption_text"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/form_outer_margin"
+        android:layout_marginEnd="@dimen/form_outer_margin"
+        android:text="@string/short_description"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

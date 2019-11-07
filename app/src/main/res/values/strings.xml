@@ -89,5 +89,8 @@
     <string name="pref_key_delay_loading_barcode_result" translatable="false">barcode_dlbr</string>
     <string name="pref_title_delay_loading_barcode_result">Delay loading barcode result</string>
     <string name="pref_summary_delay_loading_barcode_result">Will show the loading spinner for 2s</string>
+    <string name="general_information">General Information</string>
+    <string name="short_description">Short Description</string>
+    <string name="dietary_info">Dietary Information</string>
 
 </resources>
