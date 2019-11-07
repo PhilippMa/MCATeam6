@@ -49,9 +49,11 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         val veganChip: Chip = v.findViewById(R.id.vegan_chip)
 
         addButton.setOnClickListener {
-            val ingredientName = ingredientsEdit.text.toString()
+            val ingredientName = ingredientsEdit.text.toString().trim()
 
             if (ingredientName.isBlank()) return@setOnClickListener
+
+            if (productModel.ingredients.any { it.englishName == ingredientName }) return@setOnClickListener
 
             RemoteDatabase().apply {
                 signIn()
