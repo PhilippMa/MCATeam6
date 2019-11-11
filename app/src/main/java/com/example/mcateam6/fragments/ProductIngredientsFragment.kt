@@ -66,6 +66,8 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
                     productModel.ingredients.add(product)
 
                     createChip(product, ingredientsChips)
+
+                    updateDietaryConstraints()
                 }.addOnFailureListener {
                     Toast.makeText(activity, "Unknown ingredient", Toast.LENGTH_SHORT).show()
                 }
@@ -86,6 +88,31 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         }
 
         return v
+    }
+
+    private fun updateDietaryConstraints() {
+
+        vegan_chip.isEnabled = true
+        vegetarian_chip.isEnabled = true
+
+        val notVegetarian = productModel.ingredients.any { prod ->
+            prod.attributes[Attribute.VEGETARIAN] != true
+        }
+
+        if (notVegetarian) {
+            vegan_chip.isEnabled = false
+            vegetarian_chip.isEnabled = false
+            none_chip.isChecked = true
+        }
+
+        val notVegan = productModel.ingredients.any { prod ->
+            prod.attributes[Attribute.VEGAN] != true
+        }
+
+        if (notVegan) {
+            vegan_chip.isEnabled = false
+            if (vegan_chip.isChecked) vegetarian_chip.isChecked = true
+        }
     }
 
     private fun onCheckedChange(
@@ -128,6 +155,7 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
             setOnCloseIconClickListener {
                 chipGroup.removeView(this as View)
                 productModel.ingredients.remove(product)
+                updateDietaryConstraints()
             }
         }
 
