@@ -92,5 +92,7 @@
     <string name="general_information">General Information</string>
     <string name="short_description">Short Description</string>
     <string name="dietary_info">Dietary Information</string>
+    <string name="error_english_name_blank">\"English Name\" is a required field!</string>
+    <string name="error_korean_name_blank">\"Korean Name\" is a required field!</string>
 
 </resources>

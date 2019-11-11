@@ -23,7 +23,6 @@ import com.example.mcateam6.fragments.ProductIngredientsFragmentDirections
 import com.example.mcateam6.viewmodels.PagedFormModel
 import com.example.mcateam6.viewmodels.ProductViewModel
 import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentReference
 import kotlinx.android.synthetic.main.activity_add_product.*
 
 enum class AddProductFormPage {
@@ -108,11 +107,11 @@ class AddProductActivity : AppCompatActivity() {
     }
 
     private fun navigateNext() {
-        navController.navigate(pagedFormModel.currentPage.value!!.nextNavAction()!!)
+        navController.navigate(pagedFormModel.getCurrentPage().nextNavAction()!!)
     }
 
     private fun navigatePrevious() {
-        navController.navigate(pagedFormModel.currentPage.value!!.previousNavAction()!!)
+        navController.navigate(pagedFormModel.getCurrentPage().previousNavAction()!!)
     }
 
     private fun uploadProduct(db: RemoteDatabase): Task<List<String>> {
@@ -136,12 +135,14 @@ class AddProductActivity : AppCompatActivity() {
         pagedFormModel.currentPage.observe(this, Observer { page ->
             previous_button.visibility = if (page.hasPrevious) View.VISIBLE else View.INVISIBLE
             next_button.visibility = if (page.hasNext) View.VISIBLE else View.INVISIBLE
+            next_button.isEnabled = pagedFormModel.isValid(page)
             create_button.visibility =
                 if (page == AddProductFormPage.values().last()) View.VISIBLE else View.INVISIBLE
         })
 
         pagedFormModel.valid.observe(this, Observer { map ->
             create_button.isEnabled = map.values.all { it }
+            next_button.isEnabled = map[pagedFormModel.getCurrentPage()] == true
         })
     }
 

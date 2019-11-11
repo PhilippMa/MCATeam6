@@ -8,6 +8,10 @@ import java.util.*
 class PagedFormModel : ViewModel() {
     val valid = MutableLiveData<EnumMap<AddProductFormPage, Boolean>>(EnumMap(AddProductFormPage::class.java))
 
+    fun isValid(page: AddProductFormPage): Boolean {
+        return valid.value?.get(page) == true
+    }
+
     fun setValid(page: AddProductFormPage) {
         valid.value?.set(page, true)
         valid.value = valid.value
@@ -27,5 +31,9 @@ class PagedFormModel : ViewModel() {
 
     fun setCurrentPage(page: AddProductFormPage) {
         currentPage.value = page
+    }
+
+    fun getCurrentPage(): AddProductFormPage {
+        return currentPage.value!!
     }
 }
