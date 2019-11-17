@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProviders
 import com.example.mcateam6.activities.AddProductFormPage
 import com.example.mcateam6.viewmodels.PagedFormModel
 import com.example.mcateam6.viewmodels.ProductViewModel
+import com.google.android.gms.tasks.Task
 
 abstract class AddProductFormPageFragment : Fragment() {
     val pagedFormModel: PagedFormModel by lazy { ViewModelProviders.of(activity!!)[PagedFormModel::class.java] }
@@ -19,12 +20,10 @@ abstract class AddProductFormPageFragment : Fragment() {
         super.onAttach(context)
 
         pagedFormModel.setCurrentPage(formPage)
-        Log.i("FormPage", "attached: $formPage")
+        pagedFormModel.currentFragment = this
     }
+}
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        Log.i("FormPage", "created: $formPage")
-    }
+abstract class AddProductFormPageAsyncFragment : AddProductFormPageFragment() {
+    abstract fun asyncValidation(cont: (Boolean) -> Unit)
 }

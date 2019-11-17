@@ -7,11 +7,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
+import android.widget.Toast
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
+import com.example.mcateam6.database.RemoteDatabase
+import com.google.android.gms.tasks.Tasks
 
 
-class ProductGeneralInformationFragment : AddProductFormPageFragment() {
+class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
 
     override val formPage = AddProductFormPage.GENERAL_INFORMATION
 
@@ -116,5 +119,18 @@ class ProductGeneralInformationFragment : AddProductFormPageFragment() {
             formPage,
             enNameValid && krNameValid
         )
+    }
+
+    override fun asyncValidation(cont: (Boolean) -> Unit) {
+        val db = RemoteDatabase()
+
+        db.signIn().addOnSuccessListener {
+            db.getProductByEnglishName(productModel.englishName).addOnSuccessListener {
+                Toast.makeText(activity, "A product with this name already exists!", Toast.LENGTH_SHORT).show()
+                cont(false)
+            }.addOnFailureListener {
+                cont(true)
+            }
+        }
     }
 }

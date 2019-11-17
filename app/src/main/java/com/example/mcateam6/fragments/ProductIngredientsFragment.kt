@@ -2,8 +2,6 @@ package com.example.mcateam6.fragments
 
 
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,20 +10,15 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.core.view.children
-import androidx.lifecycle.ViewModelProviders
-import androidx.navigation.fragment.findNavController
 
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
 import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Product
-import com.example.mcateam6.viewmodels.ProductViewModel
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.google.firebase.auth.FirebaseUser
 import kotlinx.android.synthetic.main.fragment_product_ingredients.*
-import java.util.ArrayList
 
 class ProductIngredientsFragment : AddProductFormPageFragment() {
 

@@ -17,11 +17,13 @@ import androidx.navigation.findNavController
 import com.example.mcateam6.R
 import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Product
+import com.example.mcateam6.fragments.AddProductFormPageAsyncFragment
 import com.example.mcateam6.fragments.ProductDescriptionFragmentDirections
 import com.example.mcateam6.fragments.ProductGeneralInformationFragmentDirections
 import com.example.mcateam6.fragments.ProductIngredientsFragmentDirections
 import com.example.mcateam6.viewmodels.PagedFormModel
 import com.example.mcateam6.viewmodels.ProductViewModel
+import com.github.razir.progressbutton.*
 import com.google.android.gms.tasks.Task
 import kotlinx.android.synthetic.main.activity_add_product.*
 
@@ -69,6 +71,8 @@ class AddProductActivity : AppCompatActivity() {
     lateinit var productModel: ProductViewModel
     lateinit var pagedFormModel: PagedFormModel
 
+    private var nextButtonEnabled = true
+
     private val navController: NavController by lazy { findNavController(R.id.add_product_nav_host_fragment) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -82,12 +86,36 @@ class AddProductActivity : AppCompatActivity() {
         }
 
         next_button.setOnClickListener {
-            navigateNext()
+            if (!nextButtonEnabled) return@setOnClickListener
+
+            val currentFragment = pagedFormModel.currentFragment!!
+
+            if (currentFragment is AddProductFormPageAsyncFragment) {
+                next_button.showProgress {
+                    progressColor = Color.WHITE
+                    buttonText = ""
+                    gravity = DrawableButton.GRAVITY_CENTER
+                }
+
+                nextButtonEnabled = false
+
+                currentFragment.asyncValidation { valid ->
+                    nextButtonEnabled = true
+                    next_button.hideProgress(R.string.next)
+
+                    if (valid) navigateNext()
+                }
+            } else {
+                navigateNext()
+            }
         }
+
+        bindProgressButton(next_button)
+        next_button.attachTextChangeAnimator()
 
         create_button.setOnClickListener {
             val db = RemoteDatabase()
-            
+
             db.signIn().addOnSuccessListener {
                 uploadProduct(db).addOnSuccessListener {
                     finish()

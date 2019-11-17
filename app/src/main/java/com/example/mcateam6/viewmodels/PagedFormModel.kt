@@ -3,6 +3,7 @@ package com.example.mcateam6.viewmodels
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.mcateam6.activities.AddProductFormPage
+import com.example.mcateam6.fragments.AddProductFormPageFragment
 import java.util.*
 
 class PagedFormModel : ViewModel() {
@@ -36,4 +37,6 @@ class PagedFormModel : ViewModel() {
     fun getCurrentPage(): AddProductFormPage {
         return currentPage.value!!
     }
+
+    var currentFragment: AddProductFormPageFragment? = null
 }
