@@ -15,47 +15,94 @@ class ProductGeneralInformationFragment : AddProductFormPageFragment() {
 
     override val formPage = AddProductFormPage.GENERAL_INFORMATION
 
-    lateinit var enNameEdit: EditText
-    lateinit var krNameEdit: EditText
-    lateinit var barcodeEdit: EditText
+    private var enNameShowError = false
+    private var krNameShowError = false
+
+    private var enNameValid = false
+    private var krNameValid = false
+
+    private lateinit var enNameEdit: EditText
+    private lateinit var krNameEdit: EditText
+    private lateinit var barcodeEdit: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        pagedFormModel.setInvalid(formPage)
-
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_product_general_information, container, false)
 
-        enNameEdit = v.findViewById(R.id.en_name_edit)
-        krNameEdit = v.findViewById(R.id.kr_name_edit)
-        barcodeEdit = v.findViewById(R.id.barcode_edit)
+        findViews(v)
 
-        enNameEdit.setText(productModel.englishName)
-        krNameEdit.setText(productModel.koreanName)
-        barcodeEdit.setText(productModel.barcode)
-        updateValidation()
-        updateProductModel()
+        loadEditTextContents()
 
-        addFormListener(enNameEdit)
-        addFormListener(krNameEdit)
-        addFormListener(barcodeEdit)
+        initShowError()
+
+        initValidation()
+
+        updateValidationModel()
+
+        addTextChangedListeners()
 
         return v
     }
 
-    private fun updateProductModel() {
-        productModel.englishName = enNameEdit.text.toString()
-        productModel.koreanName = krNameEdit.text.toString()
-        productModel.barcode = barcodeEdit.text.toString()
+    private fun initShowError() {
+        enNameShowError = productModel.englishName.isNotBlank()
+        krNameShowError = productModel.koreanName.isNotBlank()
     }
 
-    private fun addFormListener(editText: EditText) {
-        editText.addTextChangedListener(object : TextWatcher {
+    private fun initValidation() {
+        enNameValid = productModel.englishName.isNotBlank()
+        krNameValid = productModel.koreanName.isNotBlank()
+    }
+
+    private fun loadEditTextContents() {
+        enNameEdit.setText(productModel.englishName)
+        krNameEdit.setText(productModel.koreanName)
+        barcodeEdit.setText(productModel.barcode)
+    }
+
+    private fun findViews(v: View) {
+        enNameEdit = v.findViewById(R.id.en_name_edit)
+        krNameEdit = v.findViewById(R.id.kr_name_edit)
+        barcodeEdit = v.findViewById(R.id.barcode_edit)
+    }
+
+    private fun addTextChangedListeners() {
+        enNameEdit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
-                updateValidation()
-                updateProductModel()
+                enNameShowError = true
+
+                enNameValid = enNameEdit.text.toString().isNotBlank()
+                enNameEdit.error = if (enNameValid) null else getString(R.string.error_english_name_blank)
+                updateValidationModel()
+
+                productModel.englishName = enNameEdit.text.toString()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+        krNameEdit.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                krNameShowError = true
+
+                krNameValid = krNameEdit.text.toString().isNotBlank()
+                krNameEdit.error = if (krNameValid) null else getString(R.string.error_korean_name_blank)
+                updateValidationModel()
+
+                productModel.koreanName = krNameEdit.text.toString()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+        barcodeEdit.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                productModel.barcode = barcodeEdit.text.toString()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -64,18 +111,10 @@ class ProductGeneralInformationFragment : AddProductFormPageFragment() {
         })
     }
 
-    private fun updateValidation() {
-        val enNameValid = enNameEdit.text.toString().isNotBlank()
-        val krNameValid = krNameEdit.text.toString().isNotBlank()
-
-        enNameEdit.error = if (enNameValid) null else getString(R.string.error_english_name_blank)
-        krNameEdit.error = if (krNameValid) null else getString(R.string.error_korean_name_blank)
-
-        val pageValid = enNameValid && krNameValid
-
+    private fun updateValidationModel() {
         pagedFormModel.setIsValid(
             formPage,
-            pageValid
+            enNameValid && krNameValid
         )
     }
 }
