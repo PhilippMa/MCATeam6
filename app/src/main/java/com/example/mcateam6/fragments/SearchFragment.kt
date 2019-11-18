@@ -1,13 +1,16 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.example.mcateam6.R
 import com.example.mcateam6.adapters.SearchItemListAdapter
@@ -25,6 +28,8 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
     var itemList: List<RemoteDatabase.FirebaseProduct>? = mutableListOf()
     lateinit var itemListAdapter: SearchItemListAdapter
+    lateinit var listView: ListView
+    lateinit var tvNoItem: TextView
 
     var itemIndex = 0
 
@@ -40,9 +45,11 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         searchBar.inflateMenu(R.menu.search_item_menu)
         searchBar.menu.setOnMenuItemClickListener(this)
 
-        val listView = v.findViewById<ListView>(R.id.list_view)
+        listView = v.findViewById(R.id.list_view)
         itemListAdapter = SearchItemListAdapter(context, itemList)
         listView.adapter = itemListAdapter
+
+        tvNoItem = v.findViewById(R.id.tv_no_item)
 
         return v
     }
@@ -90,10 +97,27 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         }
         task?.addOnCompleteListener{
             if (it.isSuccessful) {
-                itemListAdapter.updateWholeData(it.result)
+                when (it.result?.isEmpty()) {
+                    true -> {
+                        setNoItemMode()
+                    }
+                    false -> {
+                        setItemMode()
+                        itemListAdapter.updateWholeData(it.result)
+                    }
+                }
+
             } else {
                 Toast.makeText(context, "Fail to load search list", Toast.LENGTH_SHORT)
             }
         }
+    }
+    private fun setNoItemMode() {
+        tvNoItem.visibility = View.VISIBLE
+        listView.visibility = View.GONE
+    }
+    private fun setItemMode() {
+        tvNoItem.visibility = View.GONE
+        listView.visibility = View.VISIBLE
     }
 }
