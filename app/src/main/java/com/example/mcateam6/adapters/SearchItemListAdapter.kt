@@ -2,13 +2,11 @@ package com.example.mcateam6.adapters
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.ProductInfoActivity
 import com.example.mcateam6.database.RemoteDatabase
