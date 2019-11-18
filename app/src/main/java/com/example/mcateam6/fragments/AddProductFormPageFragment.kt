@@ -16,8 +16,8 @@ abstract class AddProductFormPageFragment : Fragment() {
 
     abstract val formPage: AddProductFormPage
 
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
+    override fun onStart() {
+        super.onStart()
 
         pagedFormModel.setCurrentPage(formPage)
         pagedFormModel.currentFragment = this
