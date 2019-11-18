@@ -81,9 +81,42 @@ class AddProductActivity : AppCompatActivity() {
 
         initViewModels()
 
-        previous_button.setOnClickListener {
-            navigatePrevious()
+        setPreviousButtonClickListener()
+
+        setNextButtonClickListener()
+
+        setCreateButtonClickListener()
+
+        setCloseButtonClickListener()
+
+        setFullScreen()
+    }
+
+    private fun setCloseButtonClickListener() {
+        close_button.setOnClickListener { finish() }
+    }
+
+    private fun setCreateButtonClickListener() {
+        create_button.setOnClickListener {
+            val db = RemoteDatabase()
+
+            db.signIn().addOnSuccessListener {
+                uploadProduct(db).addOnSuccessListener {
+                    finish()
+                }.addOnFailureListener {
+                    Toast.makeText(
+                        this,
+                        "Unable to upload product to database.\n Please try again!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
         }
+    }
+
+    private fun setNextButtonClickListener() {
+        bindProgressButton(next_button)
+        next_button.attachTextChangeAnimator()
 
         next_button.setOnClickListener {
             if (!nextButtonEnabled) return@setOnClickListener
@@ -109,29 +142,12 @@ class AddProductActivity : AppCompatActivity() {
                 navigateNext()
             }
         }
+    }
 
-        bindProgressButton(next_button)
-        next_button.attachTextChangeAnimator()
-
-        create_button.setOnClickListener {
-            val db = RemoteDatabase()
-
-            db.signIn().addOnSuccessListener {
-                uploadProduct(db).addOnSuccessListener {
-                    finish()
-                }.addOnFailureListener {
-                    Toast.makeText(
-                        this,
-                        "Unable to upload product to database.\n Please try again!",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
-            }
+    private fun setPreviousButtonClickListener() {
+        previous_button.setOnClickListener {
+            navigatePrevious()
         }
-
-        close_button.setOnClickListener { finish() }
-
-        setFullScreen()
     }
 
     private fun navigateNext() {
