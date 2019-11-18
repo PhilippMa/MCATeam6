@@ -239,4 +239,18 @@ class DatabaseInstrumentedTest {
         val res = Tasks.await(task)
         assertFalse(res)
     }
+
+    @Test
+    fun test_exists() {
+        val task = db.exists("BrandName", "Product")
+        val res = Tasks.await(task)
+        assertTrue(res)
+    }
+
+    @Test
+    fun test_NotExists() {
+        val task = db.exists("BrandName", "Prct")
+        val res = Tasks.await(task)
+        assertFalse(res)
+    }
 }
