@@ -11,7 +11,6 @@ import android.widget.Toast
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
 import com.example.mcateam6.database.RemoteDatabase
-import com.google.android.gms.tasks.Tasks
 
 
 class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
@@ -37,7 +36,7 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
 
         findViews(v)
 
-        loadEditTextContents()
+        loadProductModel()
 
         initShowError()
 
@@ -60,7 +59,7 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
         krNameValid = productModel.koreanName.isNotBlank()
     }
 
-    private fun loadEditTextContents() {
+    private fun loadProductModel() {
         enNameEdit.setText(productModel.englishName)
         krNameEdit.setText(productModel.koreanName)
         barcodeEdit.setText(productModel.barcode)

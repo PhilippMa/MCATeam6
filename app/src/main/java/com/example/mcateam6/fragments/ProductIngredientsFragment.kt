@@ -18,7 +18,6 @@ import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Product
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import kotlinx.android.synthetic.main.fragment_product_ingredients.*
 import java.util.*
 
 class ProductIngredientsFragment : AddProductFormPageFragment() {
@@ -28,10 +27,13 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
     private val notVeganIngr = ArrayList<String>()
     private val notVegetarianIngr = ArrayList<String>()
 
+    private lateinit var addButton: Button
+    private lateinit var ingredientsEdit: EditText
+    private lateinit var ingredientsChips: ChipGroup
+    private lateinit var vegChips: ChipGroup
     private lateinit var noneChip: Chip
     private lateinit var vegetarianChip: Chip
     private lateinit var veganChip: Chip
-    
     private lateinit var vegetarianDisabledText: TextView
     private lateinit var veganDisabledText: TextView
 
@@ -44,16 +46,36 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_product_ingredients, container, false)
 
-        val addButton: Button = v.findViewById(R.id.add_button)
-        val ingredientsEdit: EditText = v.findViewById(R.id.ingredients_edit)
-        val ingredientsChips: ChipGroup = v.findViewById(R.id.ingredients_chips)
-        val vegChips: ChipGroup = v.findViewById(R.id.veg_chips)
-        noneChip = v.findViewById(R.id.none_chip)
-        vegetarianChip = v.findViewById(R.id.vegetarian_chip)
-        veganChip = v.findViewById(R.id.vegan_chip)
-        vegetarianDisabledText = v.findViewById(R.id.vegetarian_disabled_text)
-        veganDisabledText = v.findViewById(R.id.vegan_disabled_text)
+        findViews(v)
 
+        setAddButtonClickListener()
+
+        setVegChipsCheckedChangeListener()
+
+        loadIngredientsFromModel()
+
+        updateDietaryConstraints()
+
+        return v
+    }
+
+    private fun loadIngredientsFromModel() {
+        productModel.ingredients.forEach { product ->
+            createChip(product, ingredientsChips)
+            if (product.attributes[Attribute.VEGAN] != true)
+                notVeganIngr.add(product.englishName)
+            if (product.attributes[Attribute.VEGETARIAN] != true)
+                notVegetarianIngr.add(product.englishName)
+        }
+    }
+
+    private fun setVegChipsCheckedChangeListener() {
+        vegChips.setOnCheckedChangeListener { group, checkedId ->
+            onCheckedChange(group, checkedId)
+        }
+    }
+
+    private fun setAddButtonClickListener() {
         addButton.setOnClickListener {
             val ingredientName = ingredientsEdit.text.toString().trim()
 
@@ -83,22 +105,18 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
                 }
             }
         }
+    }
 
-        vegChips.setOnCheckedChangeListener { group, checkedId ->
-            onCheckedChange(group, checkedId)
-        }
-
-        productModel.ingredients.forEach { product ->
-            createChip(product, ingredientsChips)
-            if (product.attributes[Attribute.VEGAN] != true)
-                notVeganIngr.add(product.englishName)
-            if (product.attributes[Attribute.VEGETARIAN] != true)
-                notVegetarianIngr.add(product.englishName)
-        }
-
-        updateDietaryConstraints()
-
-        return v
+    private fun findViews(v: View) {
+        addButton = v.findViewById(R.id.add_button)
+        ingredientsEdit = v.findViewById(R.id.ingredients_edit)
+        ingredientsChips = v.findViewById(R.id.ingredients_chips)
+        vegChips = v.findViewById(R.id.veg_chips)
+        noneChip = v.findViewById(R.id.none_chip)
+        vegetarianChip = v.findViewById(R.id.vegetarian_chip)
+        veganChip = v.findViewById(R.id.vegan_chip)
+        vegetarianDisabledText = v.findViewById(R.id.vegetarian_disabled_text)
+        veganDisabledText = v.findViewById(R.id.vegan_disabled_text)
     }
 
     private fun updateDietaryConstraints() {

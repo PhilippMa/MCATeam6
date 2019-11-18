@@ -30,13 +30,17 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
         // Inflate the layout for this fragment
         val v = inflater.inflate(R.layout.fragment_product_description, container, false)
 
+        initDescriptionEdit(v)
+
+        return v
+    }
+
+    private fun initDescriptionEdit(v: View) {
         val descriptionEdit = v.findViewById<EditText>(R.id.description_edit)
 
         descriptionEdit.setText(productModel.description)
 
         addFormListener(descriptionEdit)
-
-        return v
     }
 
     private fun addFormListener(editText: EditText): Unit =
