@@ -311,11 +311,8 @@ class RemoteDatabase {
         return query.get()
             .continueWith { task: Task<QuerySnapshot> ->
                 val doc = task.result!!.documents[0]
-                val obj = doc.toObject(FirebaseProduct::class.java)
-                obj!!.id = doc.id
-                obj
+                convertToFirebaseProduct(doc)
             }
-
     }
 
     /**
@@ -332,10 +329,14 @@ class RemoteDatabase {
         return query.get()
             .continueWith { task: Task<QuerySnapshot> ->
                 val doc = task.result!!.documents[0]
-                val obj = doc.toObject(FirebaseProduct::class.java)
-                obj!!.id = doc.id
-                obj
+                convertToFirebaseProduct(doc)
             }
+    }
+
+    private fun convertToFirebaseProduct(doc: DocumentSnapshot): FirebaseProduct? {
+        val obj = doc.toObject(FirebaseProduct::class.java)
+        obj!!.id = doc.id
+        return obj
     }
 
     /**
@@ -351,9 +352,7 @@ class RemoteDatabase {
         return query.get()
             .continueWith { task: Task<QuerySnapshot> ->
                 val doc = task.result!!.documents[0]
-                val obj = doc.toObject(FirebaseProduct::class.java)
-                obj!!.id = doc.id
-                obj
+                convertToFirebaseProduct(doc)
             }
     }
 
@@ -478,9 +477,13 @@ class RemoteDatabase {
      */
     fun searchEnglish(s: String, ignoreCase: Boolean = true): Task<List<FirebaseProduct>> {
         val list = prodColl.get()
-            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java) }
+            .continueWith { task: Task<QuerySnapshot> ->
+                task.result!!.documents.mapNotNull { doc ->
+                    convertToFirebaseProduct(doc)
+                }
+            }
 
-        return list.continueWith { task: Task<MutableList<FirebaseProduct>> ->
+        return list.continueWith { task: Task<List<FirebaseProduct>> ->
             task.result!!.filter { firebaseProduct ->
                 firebaseProduct.name_english.contains(
                     s,
@@ -502,9 +505,13 @@ class RemoteDatabase {
      */
     fun searchKorean(s: String, ignoreCase: Boolean = true): Task<List<FirebaseProduct>> {
         val list = prodColl.get()
-            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java) }
+            .continueWith { task: Task<QuerySnapshot> ->
+                task.result!!.documents.mapNotNull { doc ->
+                    convertToFirebaseProduct(doc)
+                }
+            }
 
-        return list.continueWith { task: Task<MutableList<FirebaseProduct>> ->
+        return list.continueWith { task: Task<List<FirebaseProduct>> ->
             task.result!!.filter { firebaseProduct ->
                 firebaseProduct.name_korean.contains(
                     s,
