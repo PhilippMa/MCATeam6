@@ -344,4 +344,18 @@ class DatabaseInstrumentedTest {
         val res = Tasks.await(task)
         assertFalse(res)
     }
+
+    @Test
+    fun test_existsBarcode() {
+        val task = db.barcodeExists("456654456")
+        val res = Tasks.await(task)
+        assertTrue(res)
+    }
+
+    @Test
+    fun test_NotExistsBarcode() {
+        val task = db.barcodeExists("000000000")
+        val res = Tasks.await(task)
+        assertFalse(res)
+    }
 }
