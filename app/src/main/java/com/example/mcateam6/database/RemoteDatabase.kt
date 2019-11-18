@@ -533,9 +533,13 @@ class RemoteDatabase {
      */
     fun searchAll(s: String, ignoreCase: Boolean = true): Task<List<FirebaseProduct>> {
         val list = prodColl.get()
-            .continueWith { task: Task<QuerySnapshot> -> task.result!!.toObjects(FirebaseProduct::class.java) }
+            .continueWith { task: Task<QuerySnapshot> ->
+                task.result!!.documents.mapNotNull { doc ->
+                    convertToFirebaseProduct(doc)
+                }
+            }
 
-        return list.continueWith { task: Task<MutableList<FirebaseProduct>> ->
+        return list.continueWith { task: Task<List<FirebaseProduct>> ->
             task.result!!.filter { firebaseProduct ->
                 firebaseProduct.name_korean.contains(s, ignoreCase)
                         || firebaseProduct.name_english.contains(s, ignoreCase)
