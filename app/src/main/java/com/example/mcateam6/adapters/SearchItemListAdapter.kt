@@ -2,6 +2,7 @@ package com.example.mcateam6.adapters
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,23 +19,19 @@ class SearchItemListAdapter(val context: Context?, var itemList: List<RemoteData
         val view: View
         val holder: ViewHolder
 
-        if (convertView==null) {
-            view = LayoutInflater.from(context).inflate(R.layout.search_listview_item, null)
-            view.setOnClickListener {
-                val intent = Intent(context, ProductInfoActivity::class.java).apply {
-                    putExtra("englishName", item?.name_english)
-                    putExtra("koreanName", item?.name_korean)
-                    putExtra("description", item?.description)
-                }
-                context?.startActivity(intent)
+        view = LayoutInflater.from(context).inflate(R.layout.search_listview_item, null)
+        view.setOnClickListener {
+            val intent = Intent(context, ProductInfoActivity::class.java).apply {
+                putExtra("englishName", item?.name_english)
+                putExtra("koreanName", item?.name_korean)
+                putExtra("description", item?.description)
             }
-            holder = ViewHolder(view)
-            holder.tvNameKorean.text = item?.name_korean
-            holder.tvNameEnglish.text = item?.name_english
-            view.tag = holder
-        } else {
-            view = convertView
+            context?.startActivity(intent)
         }
+        holder = ViewHolder(view)
+        holder.tvNameKorean.text = item?.name_korean
+        holder.tvNameEnglish.text = item?.name_english
+        view.tag = holder
         return view
     }
 
