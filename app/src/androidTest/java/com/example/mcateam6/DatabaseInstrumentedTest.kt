@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit
 class DatabaseInstrumentedTest {
 
     private lateinit var db: RemoteDatabase
-    private val ingre1 = Product("Ingredient1", "name1", "123123123", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, true)))
-    private val ingre2 = Product("Ingredient2", "name2", "321321321", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
-    private val prod = Product("Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
+    private val ingre1 = Product("BrandName", "Ingredient1", "name1", "123123123", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, true)))
+    private val ingre2 = Product("BrandName", "Ingredient2", "name2", "321321321", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
+    private val prod = Product("BrandName", "Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
 
 
     @Before
@@ -51,6 +51,7 @@ class DatabaseInstrumentedTest {
 
     private fun basicUpload() : String {
         val task = db.upload(
+            "BrandName",
             "TestProduct",
             "표본",
             "0123456789",
@@ -209,5 +210,19 @@ class DatabaseInstrumentedTest {
         val task = db.searchEnglish("Test", true);
         val res = Tasks.await(task);
         assertTrue(res.all { firebaseProduct -> firebaseProduct.name_english.contains("Test", true) })
+    }
+
+    @Test
+    fun test_exists() {
+        val task = db.exists("BrandName", "Product")
+        val res = Tasks.await(task)
+        assertTrue(res)
+    }
+
+    @Test
+    fun test_NotExists() {
+        val task = db.exists("BrandName", "Prct")
+        val res = Tasks.await(task)
+        assertFalse(res)
     }
 }

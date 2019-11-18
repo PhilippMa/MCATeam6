@@ -118,6 +118,7 @@ class AddProductActivity : AppCompatActivity() {
     private fun uploadProduct(db: RemoteDatabase): Task<List<String>> {
         return db.upload(
             Product(
+                productModel.brand,
                 productModel.englishName,
                 productModel.koreanName,
                 if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
