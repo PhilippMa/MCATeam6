@@ -71,7 +71,8 @@ class AddProductActivity : AppCompatActivity() {
     lateinit var productModel: ProductViewModel
     lateinit var pagedFormModel: PagedFormModel
 
-    private var nextButtonEnabled = true
+    private var nextInProgress = false
+    private var createInProgress = false
 
     private val navController: NavController by lazy { findNavController(R.id.add_product_nav_host_fragment) }
 
@@ -97,13 +98,28 @@ class AddProductActivity : AppCompatActivity() {
     }
 
     private fun setCreateButtonClickListener() {
+        bindProgressButton(create_button)
+        create_button.attachTextChangeAnimator()
+
         create_button.setOnClickListener {
+            if (createInProgress) return@setOnClickListener
+
+            createInProgress = true
+
+            create_button.showProgress {
+                progressColor = Color.WHITE
+                buttonText = ""
+                gravity = DrawableButton.GRAVITY_CENTER
+            }
+
             val db = RemoteDatabase()
 
             db.signIn().addOnSuccessListener {
                 uploadProduct(db).addOnSuccessListener {
                     finish()
                 }.addOnFailureListener {
+                    create_button.hideProgress(R.string.create)
+                    createInProgress = false
                     Toast.makeText(
                         this,
                         "Unable to upload product to database.\n Please try again!",
@@ -119,7 +135,7 @@ class AddProductActivity : AppCompatActivity() {
         next_button.attachTextChangeAnimator()
 
         next_button.setOnClickListener {
-            if (!nextButtonEnabled) return@setOnClickListener
+            if (nextInProgress) return@setOnClickListener
 
             val currentFragment = pagedFormModel.currentFragment!!
 
@@ -130,10 +146,10 @@ class AddProductActivity : AppCompatActivity() {
                     gravity = DrawableButton.GRAVITY_CENTER
                 }
 
-                nextButtonEnabled = false
+                nextInProgress = true
 
                 currentFragment.asyncValidation { valid ->
-                    nextButtonEnabled = true
+                    nextInProgress = false
                     next_button.hideProgress(R.string.next)
 
                     if (valid) navigateNext()
