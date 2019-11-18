@@ -25,6 +25,7 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
 
     private lateinit var enNameEdit: EditText
     private lateinit var krNameEdit: EditText
+    private lateinit var brandEdit: EditText
     private lateinit var barcodeEdit: EditText
 
     override fun onCreateView(
@@ -62,12 +63,14 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
     private fun loadProductModel() {
         enNameEdit.setText(productModel.englishName)
         krNameEdit.setText(productModel.koreanName)
+        brandEdit.setText(productModel.brand)
         barcodeEdit.setText(productModel.barcode)
     }
 
     private fun findViews(v: View) {
         enNameEdit = v.findViewById(R.id.en_name_edit)
         krNameEdit = v.findViewById(R.id.kr_name_edit)
+        brandEdit = v.findViewById(R.id.brand_edit)
         barcodeEdit = v.findViewById(R.id.barcode_edit)
     }
 
@@ -112,6 +115,15 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
         })
+        brandEdit.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                productModel.brand = brandEdit.text.toString().trim()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
         barcodeEdit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 productModel.barcode = barcodeEdit.text.toString()
@@ -134,11 +146,17 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
         val db = RemoteDatabase()
 
         db.signIn().addOnSuccessListener {
-            db.getProductByEnglishName(productModel.englishName).addOnSuccessListener {
-                Toast.makeText(activity, "A product with this name already exists!", Toast.LENGTH_SHORT).show()
-                cont(false)
-            }.addOnFailureListener {
-                cont(true)
+            db.exists(productModel.brand, productModel.englishName).addOnSuccessListener { exists ->
+                if (exists) {
+                    if (productModel.brand.isBlank()) {
+                        Toast.makeText(activity, "A product with this name already exists!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(activity, "A product with the same name and brand already exists!", Toast.LENGTH_SHORT).show()
+                    }
+                }
+
+                // The product is valid if it does not yet exist
+                cont(!exists)
             }
         }
     }

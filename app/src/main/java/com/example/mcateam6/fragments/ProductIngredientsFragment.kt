@@ -67,6 +67,12 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
             if (product.attributes[Attribute.VEGETARIAN] != true)
                 notVegetarianIngr.add(product.englishName)
         }
+
+        when {
+            productModel.attributes[Attribute.VEGAN] != false -> veganChip.isChecked = true
+            productModel.attributes[Attribute.VEGETARIAN] != false -> vegetarianChip.isChecked = true
+            else -> noneChip.isChecked = true
+        }
     }
 
     private fun setVegChipsCheckedChangeListener() {
