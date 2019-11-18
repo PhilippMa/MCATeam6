@@ -313,7 +313,6 @@ class RemoteDatabase {
                 val doc = task.result!!.documents[0]
                 convertToFirebaseProduct(doc)
             }
-
     }
 
     /**
