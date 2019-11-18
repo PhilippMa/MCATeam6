@@ -85,7 +85,7 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
                     }
                 updateValidationModel()
 
-                productModel.englishName = enNameEdit.text.toString()
+                productModel.englishName = enNameEdit.text.toString().trim()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -105,7 +105,7 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
                     }
                 updateValidationModel()
 
-                productModel.koreanName = krNameEdit.text.toString()
+                productModel.koreanName = krNameEdit.text.toString().trim()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
