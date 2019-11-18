@@ -1,7 +1,6 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
