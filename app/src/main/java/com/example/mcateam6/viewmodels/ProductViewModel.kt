@@ -10,6 +10,7 @@ class ProductViewModel : ViewModel() {
     var id: String = ""
     var englishName: String = ""
     var koreanName: String = ""
+    var brand: String = ""
     var barcode: String? = null
     var description: String = ""
     var ingredients: ArrayList<Product> = ArrayList()

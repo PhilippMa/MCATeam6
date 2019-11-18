@@ -30,6 +30,10 @@ class RemoteDatabase {
          */
         var id: String = "",
         /**
+         * Brand name of the product (empty if product is a raw ingredients (e.g. water, salt, ...)
+         */
+        var brand: String = "",
+        /**
          * English name of the product
          */
         var name_english: String = "",
@@ -72,7 +76,7 @@ class RemoteDatabase {
                 )
             }*/
             return Product(
-                id, name_english, name_korean, barcode, description, aNew
+                id, brand, name_english, name_korean, barcode, description, aNew
             )
         }
 
@@ -202,7 +206,7 @@ class RemoteDatabase {
             }
 
             val productMap: HashMap<String, Any> = HashMap()
-
+            productMap["brand"] = p.brand
             productMap["name_english"] = p.englishName
             productMap["name_korean"] = p.koreanName
             productMap["barcode"] = p.barcode.orEmpty()
@@ -218,6 +222,7 @@ class RemoteDatabase {
     }
 
     fun upload(
+        brand: String,
         englishName: String,
         koreanName: String,
         barcode: String?,
@@ -233,6 +238,7 @@ class RemoteDatabase {
         }
 
         val productMap: HashMap<String, Any> = HashMap()
+        productMap["brand"] = brand
         productMap["name_english"] = englishName
         productMap["name_korean"] = koreanName
         productMap["barcode"] = barcode.orEmpty()
@@ -329,7 +335,8 @@ class RemoteDatabase {
                 val obj = doc.toObject(FirebaseProduct::class.java)
                 obj!!.id = doc.id
                 obj
-            }    }
+            }
+    }
 
     /**
      * Returns a product for a specific barcode. If more than one product exists with the same
@@ -347,7 +354,8 @@ class RemoteDatabase {
                 val obj = doc.toObject(FirebaseProduct::class.java)
                 obj!!.id = doc.id
                 obj
-            }    }
+            }
+    }
 
     /**
      * Upload an image for a specific product. Only one image per product can be uploaded,
@@ -357,10 +365,21 @@ class RemoteDatabase {
      * @return upload task
      */
     fun uploadImage(p: Product, image: File): UploadTask {
+        return uploadImage(p.id, image)
+    }
+
+    /**
+     * Upload an image for a specific id. Only one image per product can be uploaded,
+     * if an image already exists for an id, it will be replaced by this method.
+     * @param id id of the product which the image refers to
+     * @param image file object of the image
+     * @return upload task
+     */
+    fun uploadImage(id: String, image: File): UploadTask {
         assert(image.extension == "png")
-        assert(p.id != "")
+        assert(id != "")
         val storageRef = storage.reference
-        val pRef = storageRef.child("${p.id}.png")
+        val pRef = storageRef.child("${id}.png")
         val pIRef = storageRef.child("images/" + pRef.path)
 
         val stream = FileInputStream(image)
@@ -376,9 +395,20 @@ class RemoteDatabase {
      * @return upload task
      */
     fun uploadImage(p: Product, imageStream: InputStream): UploadTask {
-        assert(p.id != "")
+        return uploadImage(p.id, imageStream)
+    }
+
+    /**
+     * Upload a image for a specific id. Only one image per product can be uploaded, if
+     * an image already exists for an id, it will be replaced by this method.
+     * @param id id of the product which the image refers to
+     * @param imageStream stream of the image
+     * @return upload task
+     */
+    fun uploadImage(id: String, imageStream: InputStream): UploadTask {
+        assert(id != "")
         val storageRef = storage.reference
-        val pRef = storageRef.child("${p.id}.png")
+        val pRef = storageRef.child("${id}.png")
         val pIRef = storageRef.child("images/" + pRef.path)
 
         return pIRef.putStream(imageStream)
@@ -392,8 +422,19 @@ class RemoteDatabase {
      * @return A task of type ByteArray. Task might take some time until completion.
      */
     fun downloadImage(p: Product): Task<ByteArray> {
+        return downloadImage(p.id)
+    }
+
+    /**
+     * Download the original, uncompressed image for the id of a specific product. Only one image
+     * per product is available. Please use downloadImageSmall for a smaller version of the
+     * images, as uncompressed images might take long to download.
+     * @param id if of the product, which image will be downloaded
+     * @return A task of type ByteArray. Task might take some time until completion.
+     */
+    fun downloadImage(id: String): Task<ByteArray> {
         val storageRef = storage.reference
-        val pathRef = storageRef.child("images/${p.id}.png")
+        val pathRef = storageRef.child("images/${id}.png")
 
         return pathRef.getBytes(1024 * 1024 * 10)
     }
@@ -407,8 +448,20 @@ class RemoteDatabase {
      * @see Task
      */
     fun downloadImageSmall(p: Product): Task<ByteArray> {
+        return downloadImageSmall(p.id)
+    }
+
+    /**
+     * Download a compressed image in the size 1024*1024 (or smaller, according to ratio)
+     * for an id of a specific product. Only one image per product is available. Small images are available
+     * about 1 min after upload as the compression extension has to run first.
+     * @param id id of the product, which image will be downloaded
+     * @return A Task of type ByteArray. Task might take some time until completion.
+     * @see Task
+     */
+    fun downloadImageSmall(id: String): Task<ByteArray> {
         val storageRef = storage.reference
-        val pathRef = storageRef.child("images/small/${p.id}_${small}x${small}.png")
+        val pathRef = storageRef.child("images/small/${id}_${small}x${small}.png")
 
         return pathRef.getBytes(1024 * 1024 * 3)
     }
@@ -481,5 +534,35 @@ class RemoteDatabase {
                         || firebaseProduct.name_english.contains(s, ignoreCase)
             }
         }
+    }
+
+    /**
+     * Checks remote database for a similar product (== identical english, korean and brand names)
+     * @param p product which should be checked for duplicate
+     * @return a task of boolean which returns True, if a product with the identical values exists in the remote database
+     * @see Task
+     */
+    fun exists(p: Product): Task<Boolean> {
+        return exists(p.brand, p.englishName)
+    }
+
+    /**
+     * Checks remote database for a product with similar values (== identical english and brand names)
+     * @param brand brand name of the product
+     * @param englishName english name of the product
+     * @return a task of boolean which returns True, if a product with the identical values exists in the remote database
+     * @see Task
+     */
+    fun exists(brand: String, englishName: String): Task<Boolean> {
+        val query = prodColl.whereEqualTo("name_english", englishName).whereEqualTo("brand", brand)
+        return query.get().continueWith { task: Task<QuerySnapshot> -> !task.result!!.isEmpty }
+    }
+
+    /**
+     * Checks remote database for a product with
+     */
+    fun barcodeExists(barcode: String): Task<Boolean> {
+        val query = prodColl.whereEqualTo("barcode", barcode)
+        return query.get().continueWith { task: Task<QuerySnapshot> -> !task.result!!.isEmpty }
     }
 }
