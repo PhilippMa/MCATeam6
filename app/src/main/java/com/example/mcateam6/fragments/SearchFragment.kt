@@ -1,7 +1,6 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -10,7 +9,6 @@ import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
-import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import com.example.mcateam6.R
 import com.example.mcateam6.adapters.SearchItemListAdapter
@@ -106,7 +104,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                         itemListAdapter.updateWholeData(it.result)
                     }
                 }
-
             } else {
                 Toast.makeText(context, "Fail to load search list", Toast.LENGTH_SHORT)
             }
