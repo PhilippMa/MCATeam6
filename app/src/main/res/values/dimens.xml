@@ -75,4 +75,5 @@
     <dimen name="barcode_field_label_size">12sp</dimen>
     <dimen name="barcode_field_label_padding">4dp</dimen>
     <dimen name="divider_height">1dp</dimen>
+    <dimen name="form_small_margin">7dp</dimen>
 </resources>

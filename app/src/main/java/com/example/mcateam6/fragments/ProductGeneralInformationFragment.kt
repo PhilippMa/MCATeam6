@@ -78,7 +78,12 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
                 enNameShowError = true
 
                 enNameValid = enNameEdit.text.toString().isNotBlank()
-                enNameEdit.error = if (enNameValid) null else getString(R.string.error_english_name_blank)
+                enNameEdit.error =
+                    if (enNameValid) {
+                        null
+                    } else {
+                        getString(R.string.error_required_field, getString(R.string.korean_name))
+                    }
                 updateValidationModel()
 
                 productModel.englishName = enNameEdit.text.toString()
@@ -93,7 +98,12 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
                 krNameShowError = true
 
                 krNameValid = krNameEdit.text.toString().isNotBlank()
-                krNameEdit.error = if (krNameValid) null else getString(R.string.error_korean_name_blank)
+                krNameEdit.error =
+                    if (krNameValid) {
+                        null
+                    } else {
+                        getString(R.string.error_required_field, getString(R.string.korean_name))
+                    }
                 updateValidationModel()
 
                 productModel.koreanName = krNameEdit.text.toString()

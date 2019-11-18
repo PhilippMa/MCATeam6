@@ -89,10 +89,14 @@
     <string name="pref_key_delay_loading_barcode_result" translatable="false">barcode_dlbr</string>
     <string name="pref_title_delay_loading_barcode_result">Delay loading barcode result</string>
     <string name="pref_summary_delay_loading_barcode_result">Will show the loading spinner for 2s</string>
+
     <string name="general_information">General Information</string>
     <string name="short_description">Short Description</string>
     <string name="dietary_info">Dietary Information</string>
-    <string name="error_english_name_blank">\"English Name\" is a required field!</string>
-    <string name="error_korean_name_blank">\"Korean Name\" is a required field!</string>
+    <string name="error_required_field">\'%s\' is a required field!</string>
+    <plurals name="info_attribute_disabled">
+        <item quantity="one">Attribute \'%1$s\' is disabled because ingredient %3$s is not %2$s</item>
+        <item quantity="other">Attribute \'%1$s\' is disabled because %3$s and %4$d other ingredients are not %2$s</item>
+    </plurals>
 
 </resources>

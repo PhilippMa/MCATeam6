@@ -8,9 +8,9 @@ import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.children
-
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
 import com.example.mcateam6.database.RemoteDatabase
@@ -19,10 +19,21 @@ import com.example.mcateam6.datatypes.Product
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import kotlinx.android.synthetic.main.fragment_product_ingredients.*
+import java.util.*
 
 class ProductIngredientsFragment : AddProductFormPageFragment() {
 
     override val formPage = AddProductFormPage.INGREDIENTS
+
+    private val notVeganIngr = ArrayList<String>()
+    private val notVegetarianIngr = ArrayList<String>()
+
+    private lateinit var noneChip: Chip
+    private lateinit var vegetarianChip: Chip
+    private lateinit var veganChip: Chip
+    
+    private lateinit var vegetarianDisabledText: TextView
+    private lateinit var veganDisabledText: TextView
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -37,9 +48,11 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         val ingredientsEdit: EditText = v.findViewById(R.id.ingredients_edit)
         val ingredientsChips: ChipGroup = v.findViewById(R.id.ingredients_chips)
         val vegChips: ChipGroup = v.findViewById(R.id.veg_chips)
-        val noneChip: Chip = v.findViewById(R.id.none_chip)
-        val vegetarianChip: Chip = v.findViewById(R.id.vegetarian_chip)
-        val veganChip: Chip = v.findViewById(R.id.vegan_chip)
+        noneChip = v.findViewById(R.id.none_chip)
+        vegetarianChip = v.findViewById(R.id.vegetarian_chip)
+        veganChip = v.findViewById(R.id.vegan_chip)
+        vegetarianDisabledText = v.findViewById(R.id.vegetarian_disabled_text)
+        veganDisabledText = v.findViewById(R.id.vegan_disabled_text)
 
         addButton.setOnClickListener {
             val ingredientName = ingredientsEdit.text.toString().trim()
@@ -57,6 +70,10 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
                     val product = fbProduct.toProduct()
 
                     productModel.ingredients.add(product)
+                    if (product.attributes[Attribute.VEGAN] != true)
+                        notVeganIngr.add(product.englishName)
+                    if (product.attributes[Attribute.VEGETARIAN] != true)
+                        notVegetarianIngr.add(product.englishName)
 
                     createChip(product, ingredientsChips)
 
@@ -71,40 +88,57 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
             onCheckedChange(group, checkedId)
         }
 
-        productModel.ingredients.forEach { createChip(it, ingredientsChips) }
-
-        when {
-            productModel.attributes[Attribute.VEGAN] == true -> veganChip.isChecked = true
-            productModel.attributes[Attribute.VEGETARIAN] == true -> vegetarianChip.isChecked = true
-            productModel.attributes[Attribute.VEGETARIAN] == false -> noneChip.isChecked = true
-            else -> veganChip.isChecked = true
+        productModel.ingredients.forEach { product ->
+            createChip(product, ingredientsChips)
+            if (product.attributes[Attribute.VEGAN] != true)
+                notVeganIngr.add(product.englishName)
+            if (product.attributes[Attribute.VEGETARIAN] != true)
+                notVegetarianIngr.add(product.englishName)
         }
+
+        updateDietaryConstraints()
 
         return v
     }
 
     private fun updateDietaryConstraints() {
 
-        vegan_chip.isEnabled = true
-        vegetarian_chip.isEnabled = true
+        veganChip.isEnabled = true
+        vegetarianChip.isEnabled = true
 
-        val notVegetarian = productModel.ingredients.any { prod ->
-            prod.attributes[Attribute.VEGETARIAN] != true
+        if (notVegetarianIngr.isNotEmpty()) {
+            veganChip.isEnabled = false
+            vegetarianChip.isEnabled = false
+            noneChip.isChecked = true
+
+            vegetarianDisabledText.text = resources.getQuantityString(
+                R.plurals.info_attribute_disabled,
+                notVegetarianIngr.size,
+                getString(R.string.vegetarian),
+                getString(R.string.vegetarian).toLowerCase(Locale.getDefault()),
+                notVegetarianIngr.first(),
+                notVegetarianIngr.size - 1
+            )
+            vegetarianDisabledText.visibility = View.VISIBLE
+        } else {
+            vegetarianDisabledText.visibility = View.GONE
         }
 
-        if (notVegetarian) {
-            vegan_chip.isEnabled = false
-            vegetarian_chip.isEnabled = false
-            none_chip.isChecked = true
-        }
+        if (notVeganIngr.isNotEmpty()) {
+            veganChip.isEnabled = false
+            if (veganChip.isChecked) vegetarianChip.isChecked = true
 
-        val notVegan = productModel.ingredients.any { prod ->
-            prod.attributes[Attribute.VEGAN] != true
-        }
-
-        if (notVegan) {
-            vegan_chip.isEnabled = false
-            if (vegan_chip.isChecked) vegetarian_chip.isChecked = true
+            veganDisabledText.text = resources.getQuantityString(
+                R.plurals.info_attribute_disabled,
+                notVeganIngr.size,
+                getString(R.string.vegan),
+                getString(R.string.vegan).toLowerCase(Locale.getDefault()),
+                notVeganIngr.first(),
+                notVeganIngr.size - 1
+            )
+            veganDisabledText.visibility = View.VISIBLE
+        } else {
+            veganDisabledText.visibility = View.GONE
         }
     }
 
@@ -148,6 +182,8 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
             setOnCloseIconClickListener {
                 chipGroup.removeView(this as View)
                 productModel.ingredients.remove(product)
+                notVeganIngr.remove(product.englishName)
+                notVegetarianIngr.remove(product.englishName)
                 updateDietaryConstraints()
             }
         }
