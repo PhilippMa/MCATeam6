@@ -27,6 +27,11 @@
         <item quantity="other">Attribute \'%1$s\' is disabled because %3$s and %4$d other ingredients are not %2$s</item>
     </plurals>
 
+    <string name="bottom_sheet_option_camera">Use Camera</string>
+    <string name="bottom_sheet_option_gallery">Upload from Gallery</string>
+    <string name="bottom_sheet_option_heading">Edit Photo</string>
+    <string name="bottom_sheet_option_remove_photo">Remove Photo</string>
+
     <string name="entry_java_title">Java</string>
     <string name="entry_java_subtitle">Run the MLKit Showcase written in Java.</string>
     <string name="entry_kotlin_title">Kotlin</string>
@@ -99,5 +104,6 @@
     <string name="pref_key_delay_loading_barcode_result" translatable="false">barcode_dlbr</string>
     <string name="pref_title_delay_loading_barcode_result">Delay loading barcode result</string>
     <string name="pref_summary_delay_loading_barcode_result">Will show the loading spinner for 2s</string>
+    <string name="product_image">Product Image</string>
 
 </resources>

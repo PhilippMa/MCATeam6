@@ -1,6 +1,7 @@
 package com.example.mcateam6.activities
 
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +25,6 @@ import com.example.mcateam6.fragments.ProductIngredientsFragmentDirections
 import com.example.mcateam6.viewmodels.PagedFormModel
 import com.example.mcateam6.viewmodels.ProductViewModel
 import com.github.razir.progressbutton.*
-import com.google.android.gms.tasks.Task
 import kotlinx.android.synthetic.main.activity_add_product.*
 
 enum class AddProductFormPage {
@@ -68,8 +68,8 @@ enum class AddProductFormPage {
 
 class AddProductActivity : AppCompatActivity() {
 
-    lateinit var productModel: ProductViewModel
-    lateinit var pagedFormModel: PagedFormModel
+    private lateinit var productModel: ProductViewModel
+    private lateinit var pagedFormModel: PagedFormModel
 
     private var nextInProgress = false
     private var createInProgress = false
@@ -115,8 +115,20 @@ class AddProductActivity : AppCompatActivity() {
             val db = RemoteDatabase()
 
             db.signIn().addOnSuccessListener {
-                uploadProduct(db).addOnSuccessListener {
-                    finish()
+                db.upload(createProduct()).addOnSuccessListener { ids ->
+                    val uri = productModel.imageUri
+                    if (uri != Uri.EMPTY) {
+                        val imageStream = contentResolver.openInputStream(uri)
+                        if (imageStream != null) {
+                            db.uploadImage(ids[0], imageStream).addOnSuccessListener {
+                                finish()
+                            }
+                        } else {
+                            finish()
+                        }
+                    } else {
+                        finish()
+                    }
                 }.addOnFailureListener {
                     create_button.hideProgress(R.string.create)
                     createInProgress = false
@@ -174,17 +186,15 @@ class AddProductActivity : AppCompatActivity() {
         navController.navigate(pagedFormModel.getCurrentPage().previousNavAction()!!)
     }
 
-    private fun uploadProduct(db: RemoteDatabase): Task<List<String>> {
-        return db.upload(
-            Product(
-                productModel.brand,
-                productModel.englishName,
-                productModel.koreanName,
-                if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
-                productModel.description,
-                productModel.ingredients,
-                productModel.attributes
-            )
+    private fun createProduct(): Product {
+        return Product(
+            productModel.brand,
+            productModel.englishName,
+            productModel.koreanName,
+            if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
+            productModel.description,
+            productModel.ingredients,
+            productModel.attributes
         )
     }
 
