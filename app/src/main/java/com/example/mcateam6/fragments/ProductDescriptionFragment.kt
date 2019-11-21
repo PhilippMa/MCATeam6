@@ -15,7 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
-import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
@@ -164,6 +164,10 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
         }
     }
 
+    private fun resolveColor(id: Int): Int {
+        return ContextCompat.getColor(activity!!, id)
+    }
+
     private fun cropImage() {
         val photoFile: File? = try {
             createImageFile()
@@ -183,9 +187,19 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
                 file
             )
 
+            val options = UCrop.Options().apply {
+                setStatusBarColor(resolveColor(R.color.colorPrimaryDark))
+                setToolbarColor(resolveColor(R.color.colorPrimary))
+                setActiveWidgetColor(resolveColor(R.color.colorPrimary))
+                setActiveControlsWidgetColor(resolveColor(R.color.colorPrimary))
+                setToolbarWidgetColor(resolveColor(R.color.white))
+                setToolbarTitle("Adjust Image")
+            }
+
             UCrop.of(uncroppedUri, croppedUri)
                 .withAspectRatio(1f, 1f)
                 .withMaxResultSize(400, 400)
+                .withOptions(options)
                 .start(activity!!, this)
         }
     }

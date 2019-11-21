@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <color name="ucrop_color_widget_rotate_mid_line" tools:override="true">#008577</color>
+    <color name="ucrop_color_widget_text" tools:override="true">#008577</color>
 
     <color name="red">#FF0000</color>
 
