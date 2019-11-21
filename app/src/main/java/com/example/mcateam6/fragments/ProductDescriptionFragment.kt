@@ -15,10 +15,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_product_description.*
 import java.io.File
 import java.io.IOException
@@ -147,15 +149,44 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
         if (resultCode != Activity.RESULT_CANCELED) {
             when (requestCode) {
                 REQUEST_CAMERA -> if (resultCode == Activity.RESULT_OK) {
-                    product_image.setImageURI(productModel.imageUri)
+                    cropImage()
                 }
+
                 REQUEST_GALLERY -> if (resultCode == Activity.RESULT_OK && data != null) {
                     data.data?.also { uri ->
                         productModel.imageUri = uri
-                        product_image.setImageURI(uri)
+                        cropImage()
                     }
                 }
+
+                UCrop.REQUEST_CROP -> product_image.setImageURI(productModel.imageUri)
             }
+        }
+    }
+
+    private fun cropImage() {
+        val photoFile: File? = try {
+            createImageFile()
+        } catch (ex: IOException) {
+            // Error occurred while creating the File
+            null
+        }
+
+        photoFile?.also { file ->
+            val uncroppedUri = productModel.imageUri
+
+            val croppedUri = Uri.fromFile(file)
+
+            productModel.imageUri = FileProvider.getUriForFile(
+                activity!!,
+                "com.example.mcateam6.fileprovider",
+                file
+            )
+
+            UCrop.of(uncroppedUri, croppedUri)
+                .withAspectRatio(1f, 1f)
+                .withMaxResultSize(400, 400)
+                .start(activity!!, this)
         }
     }
 
