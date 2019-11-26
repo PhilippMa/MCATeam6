@@ -42,8 +42,8 @@ class SearchItemAdapter(val context: Context?, var itemList: MutableList<RemoteD
 
         // TODO()
         val attribute = item?.attributes
-        val vegan:Boolean = attribute?.get(SearchItemListAdapter.VEGAN)?.toBoolean() ?: false
-        val vegetarian: Boolean = attribute?.get(SearchItemListAdapter.VEGETARIAN)?.toBoolean() ?: false
+        val vegan:Boolean = attribute?.get(VEGAN)?.toBoolean() ?: false
+        val vegetarian: Boolean = attribute?.get(VEGETARIAN)?.toBoolean() ?: false
         if (vegan) {
             holder.ivAttribute.setBackgroundColor(Color.parseColor("#006400"))
         } else if (vegetarian) {
