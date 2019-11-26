@@ -1,19 +1,19 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
-import com.example.mcateam6.adapters.SearchItemListAdapter
+import com.example.mcateam6.adapters.SearchItemAdapter
 import com.example.mcateam6.database.RemoteDatabase
 import com.google.android.gms.tasks.Task
 import com.mancj.materialsearchbar.MaterialSearchBar
@@ -26,9 +26,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     private val ITEM_KOREAN = 1
     private val ITEM_ENGLISH = 2
 
-    var itemList: List<RemoteDatabase.FirebaseProduct>? = mutableListOf()
-    lateinit var itemListAdapter: SearchItemListAdapter
-    lateinit var listView: ListView
+    var itemList: MutableList<RemoteDatabase.FirebaseProduct>? = mutableListOf()
+    lateinit var itemAdapter: SearchItemAdapter
+
+    lateinit var recyclerView: RecyclerView
     lateinit var tvNoItem: TextView
 
     var itemIndex = 0
@@ -45,9 +46,11 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         searchBar.inflateMenu(R.menu.search_item_menu)
         searchBar.menu.setOnMenuItemClickListener(this)
 
-        listView = v.findViewById(R.id.list_view)
-        itemListAdapter = SearchItemListAdapter(context, itemList)
-        listView.adapter = itemListAdapter
+        recyclerView = v.findViewById(R.id.recycler_view)
+
+        itemAdapter = SearchItemAdapter(context, itemList)
+        recyclerView.adapter = itemAdapter
+        recyclerView.layoutManager = LinearLayoutManager(activity)
 
         tvNoItem = v.findViewById(R.id.tv_no_item)
 
@@ -86,13 +89,13 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         var task: Task<List<RemoteDatabase.FirebaseProduct>>? = null
         when (itemIndex) {
             ITEM_ALL -> {
-                task = db.searchAll(text.toString())
+                task = db.searchAll(text.toString().trim())
             }
             ITEM_KOREAN -> {
-                task = db.searchKorean(text.toString())
+                task = db.searchKorean(text.toString().trim())
             }
             ITEM_ENGLISH -> {
-                task = db.searchEnglish(text.toString())
+                task = db.searchEnglish(text.toString().trim())
             }
         }
         task?.addOnCompleteListener{
@@ -103,7 +106,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                     }
                     false -> {
                         setItemMode()
-                        itemListAdapter.updateWholeData(it.result)
+                        itemAdapter.updateWholeData(it.result)
                     }
                 }
             } else {
@@ -113,10 +116,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     }
     private fun setNoItemMode() {
         tvNoItem.visibility = View.VISIBLE
-        listView.visibility = View.GONE
+        recyclerView.visibility = View.GONE
     }
     private fun setItemMode() {
         tvNoItem.visibility = View.GONE
-        listView.visibility = View.VISIBLE
+        recyclerView.visibility = View.VISIBLE
     }
 }
