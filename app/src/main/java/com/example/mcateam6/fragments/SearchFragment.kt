@@ -1,13 +1,10 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
@@ -16,7 +13,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
 import com.example.mcateam6.adapters.SearchItemAdapter
-import com.example.mcateam6.adapters.SearchItemListAdapter
 import com.example.mcateam6.database.RemoteDatabase
 import com.google.android.gms.tasks.Task
 import com.mancj.materialsearchbar.MaterialSearchBar
@@ -92,13 +88,13 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         var task: Task<List<RemoteDatabase.FirebaseProduct>>? = null
         when (itemIndex) {
             ITEM_ALL -> {
-                task = db.searchAll(text.toString().trim())
+                task = db.searchAll(text.toString())
             }
             ITEM_KOREAN -> {
-                task = db.searchKorean(text.toString().trim())
+                task = db.searchKorean(text.toString())
             }
             ITEM_ENGLISH -> {
-                task = db.searchEnglish(text.toString().trim())
+                task = db.searchEnglish(text.toString())
             }
         }
         task?.addOnCompleteListener{
@@ -109,7 +105,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                     }
                     false -> {
                         setItemMode()
-                        itemAdapter.updateWholeData(it.result)
+                        itemListAdapter.updateWholeData(it.result)
                     }
                 }
             } else {
@@ -119,10 +115,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     }
     private fun setNoItemMode() {
         tvNoItem.visibility = View.VISIBLE
-        recyclerView.visibility = View.GONE
+        listView.visibility = View.GONE
     }
     private fun setItemMode() {
         tvNoItem.visibility = View.GONE
-        recyclerView.visibility = View.VISIBLE
+        listView.visibility = View.VISIBLE
     }
 }
