@@ -18,10 +18,10 @@
         android:visibility="visible"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
-    <ListView
-        android:id="@+id/list_view"
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler_view"
         android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent"/>
 </LinearLayout>
