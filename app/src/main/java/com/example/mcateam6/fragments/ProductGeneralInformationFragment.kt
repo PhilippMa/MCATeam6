@@ -26,7 +26,6 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
     private lateinit var enNameEdit: EditText
     private lateinit var krNameEdit: EditText
     private lateinit var brandEdit: EditText
-    private lateinit var barcodeEdit: EditText
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -64,14 +63,12 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
         enNameEdit.setText(productModel.englishName)
         krNameEdit.setText(productModel.koreanName)
         brandEdit.setText(productModel.brand)
-        barcodeEdit.setText(productModel.barcode)
     }
 
     private fun findViews(v: View) {
         enNameEdit = v.findViewById(R.id.en_name_edit)
         krNameEdit = v.findViewById(R.id.kr_name_edit)
         brandEdit = v.findViewById(R.id.brand_edit)
-        barcodeEdit = v.findViewById(R.id.barcode_edit)
     }
 
     private fun addTextChangedListeners() {
@@ -118,15 +115,6 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
         brandEdit.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 productModel.brand = brandEdit.text.toString().trim()
-            }
-
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
-        })
-        barcodeEdit.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(s: Editable?) {
-                productModel.barcode = barcodeEdit.text.toString()
             }
 
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

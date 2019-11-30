@@ -13,12 +13,17 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
+import com.example.mcateam6.activities.BARCODE_EXTRA
+import com.example.mcateam6.activities.LiveBarcodeScanningActivity
+import com.example.mcateam6.database.RemoteDatabase
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.yalantis.ucrop.UCrop
 import kotlinx.android.synthetic.main.fragment_product_description.*
@@ -30,8 +35,9 @@ import java.util.*
 
 const val REQUEST_CAMERA = 0
 const val REQUEST_GALLERY = 1
+const val REQUEST_BARCODE = 2
 
-class ProductDescriptionFragment : AddProductFormPageFragment() {
+class ProductDescriptionFragment : AddProductFormPageAsyncFragment() {
 
     override val formPage = AddProductFormPage.DESCRIPTION
 
@@ -44,6 +50,8 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
         this::onSelectRemove
     )
 
+    private lateinit var barcodeEdit: EditText
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -55,6 +63,39 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
 
         initDescriptionEdit(v)
 
+        initBarcodeEdit(v)
+
+        initImageChooser(v)
+
+        initScan(v)
+
+        return v
+    }
+
+    private fun initScan(v: View) {
+        v.findViewById<Button>(R.id.scan_button).setOnClickListener {
+            val intent = Intent().setClass(context!!, LiveBarcodeScanningActivity::class.java)
+            startActivityForResult(intent, REQUEST_BARCODE)
+        }
+    }
+
+    private fun initBarcodeEdit(v: View) {
+        barcodeEdit = v.findViewById(R.id.barcode_edit)
+
+        barcodeEdit.setText(productModel.barcode)
+
+        barcodeEdit.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                productModel.barcode = barcodeEdit.text.toString()
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+        })
+    }
+
+    private fun initImageChooser(v: View) {
         v.findViewById<FloatingActionButton>(R.id.edit_image_fab).setOnClickListener {
             addPhotoBottomDialog.show(
                 activity!!.supportFragmentManager,
@@ -65,10 +106,10 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
         productModel.imageUri.also { uri ->
             if (uri != Uri.EMPTY) {
                 v.findViewById<ImageView>(R.id.product_image).setImageURI(uri)
+            } else {
+                v.findViewById<ImageView>(R.id.product_image).setImageResource(R.drawable.no_image)
             }
         }
-
-        return v
     }
 
     private fun initDescriptionEdit(v: View) {
@@ -160,6 +201,12 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
                 }
 
                 UCrop.REQUEST_CROP -> product_image.setImageURI(productModel.imageUri)
+
+                REQUEST_BARCODE -> if (resultCode == Activity.RESULT_OK && data != null) {
+                    val barcode = data.getStringExtra(BARCODE_EXTRA)
+                    barcode_edit.setText(barcode)
+                    productModel.barcode = barcode
+                }
             }
         }
     }
@@ -215,5 +262,25 @@ class ProductDescriptionFragment : AddProductFormPageFragment() {
             ".jpg", /* suffix */
             storageDir /* directory */
         )
+    }
+
+    override fun asyncValidation(cont: (Boolean) -> Unit) {
+        if (productModel.barcode.isNullOrBlank()) {
+            cont(true)
+            return
+        }
+
+        val db = RemoteDatabase()
+
+        db.signIn().addOnSuccessListener {
+            db.barcodeExists(productModel.barcode!!).addOnSuccessListener { exists ->
+                if (exists) {
+                    Toast.makeText(activity, "A product with this barcode already exists!", Toast.LENGTH_SHORT).show()
+                }
+
+                // The product is valid if it does not yet exist
+                cont(!exists)
+            }
+        }
     }
 }

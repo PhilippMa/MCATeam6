@@ -19,7 +19,6 @@ package com.example.mcateam6.activities
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.content.Intent
-import android.hardware.Camera
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -27,20 +26,19 @@ import android.view.View.OnClickListener
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.android.material.chip.Chip
-import com.google.common.base.Objects
 import com.example.mcateam6.R
-import com.example.mcateam6.kotlin.camera.GraphicOverlay
-import com.example.mcateam6.kotlin.camera.WorkflowModel
-import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
-import com.example.mcateam6.kotlin.barcodedetection.BarcodeField
 import com.example.mcateam6.kotlin.barcodedetection.BarcodeProcessor
 import com.example.mcateam6.kotlin.barcodedetection.BarcodeResultFragment
 import com.example.mcateam6.kotlin.camera.CameraSource
 import com.example.mcateam6.kotlin.camera.CameraSourcePreview
-import com.example.mcateam6.kotlin.settings.SettingsActivity
+import com.example.mcateam6.kotlin.camera.GraphicOverlay
+import com.example.mcateam6.kotlin.camera.WorkflowModel
+import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
+import com.google.android.material.chip.Chip
+import com.google.common.base.Objects
 import java.io.IOException
-import java.util.ArrayList
+
+const val BARCODE_EXTRA = "BARCODE"
 
 /** Demonstrates the barcode scanning workflow using camera preview.  */
 class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
@@ -58,7 +56,7 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setContentView(R.layout.activity_live_barcode_kotlin)
+        setContentView(R.layout.activity_live_barcode_scanning)
         preview = findViewById(R.id.camera_preview)
         graphicOverlay = findViewById<GraphicOverlay>(R.id.camera_preview_graphic_overlay).apply {
             setOnClickListener(this@LiveBarcodeScanningActivity)
@@ -200,9 +198,8 @@ class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
 
         workflowModel?.detectedBarcode?.observe(this, Observer { barcode ->
             if (barcode != null) {
-                val barcodeFieldList = ArrayList<BarcodeField>()
-                barcodeFieldList.add(BarcodeField("Raw Value", barcode.rawValue ?: ""))
-                BarcodeResultFragment.show(supportFragmentManager, barcodeFieldList)
+                setResult(RESULT_OK, Intent().putExtra(BARCODE_EXTRA, barcode.rawValue))
+                finish()
             }
         })
     }
