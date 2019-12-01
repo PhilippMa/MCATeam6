@@ -15,7 +15,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="english name"
+            android:text="@string/english_name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,7 +25,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="korean name"
+            android:text="@string/korean_name"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_english_name" />
 
@@ -47,9 +47,18 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="vegan"
+            android:text="@string/vegan"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_image" />
+
+        <ImageView
+            android:id="@+id/image-vegan"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@+id/text_vegan"
+            app:layout_constraintTop_toTopOf="@+id/text_vegan"
+            app:srcCompat="@android:drawable/checkbox_off_background" />
 
         <TextView
             android:id="@+id/text_vegetarian"
@@ -57,9 +66,18 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="vegetarian"
+            android:text="@string/vegetarian"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_vegan" />
+
+        <ImageView
+            android:id="@+id/image-vegetarian"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="12dp"
+            app:layout_constraintStart_toEndOf="@+id/text_vegetarian"
+            app:layout_constraintTop_toTopOf="@+id/text_vegetarian"
+            app:srcCompat="@android:drawable/checkbox_off_background" />
 
         <TextView
             android:id="@+id/text_description"
@@ -67,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
-            android:text="description"
+            android:text="@string/description"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/text_vegetarian" />
 
