@@ -1,5 +1,7 @@
 package com.example.mcateam6.activities
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,9 +17,9 @@ class ProductInfoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_product_info)
 
         val intent = this.intent
-        val id = intent.extras?.get("id")
+        val id = intent.extras?.get("id").toString()
 
-        val task = db.getProductById(id.toString())
+        val task = db.getProductById(id)
         task.addOnCompleteListener{
             if (it.isSuccessful) {
                 val product = it.result
@@ -28,6 +30,21 @@ class ProductInfoActivity : AppCompatActivity() {
                 val attr = product?.attributes
                 text_vegan.text = "Vegan: ${attr?.get("VEGAN")}"
                 text_vegetarian.text = "Vegetarian: ${attr?.get("VEGETARIAN")}"
+
+                val imageTask = db.downloadImageSmall(id)
+                imageTask.addOnCompleteListener{it2 ->
+                    if (it2.isSuccessful) {
+                        val byteArray = it2.result
+                        val bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size)
+                        view_image.setImageBitmap(Bitmap.createScaledBitmap(
+                            bmp, view_image.width, view_image.height, false))
+                    } else {
+                        val toast = Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT)
+                        toast.show()
+                    }
+                }
+
+//                recycler_ingredients.
             } else {
                 val toast = Toast.makeText(this, "Failed to load product", Toast.LENGTH_SHORT)
                 toast.show()

@@ -64,9 +64,7 @@ class SearchItemAdapter(val context: Context, var productList: MutableList<Remot
                 val item = productList[pos]
 
                 val intent = Intent(context, ProductInfoActivity::class.java).apply {
-                    putExtra("englishName", item.name_english)
-                    putExtra("koreanName", item.name_korean)
-                    putExtra("description", item.description)
+                    putExtra("id", item?.id)
                 }
                 context.startActivity(intent)
             }
