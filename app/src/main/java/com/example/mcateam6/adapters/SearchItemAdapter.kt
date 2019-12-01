@@ -15,7 +15,7 @@ import com.example.mcateam6.R
 import com.example.mcateam6.activities.ProductInfoActivity
 
 
-class SearchItemAdapter(val context: Context?, var itemList: MutableList<RemoteDatabase.FirebaseProduct>?) : RecyclerView.Adapter<SearchItemAdapter.ViewHolder>() {
+class SearchItemAdapter constructor(val context: Context?, var itemList: MutableList<RemoteDatabase.FirebaseProduct>?) : RecyclerView.Adapter<SearchItemAdapter.ViewHolder>() {
     companion object {
         val VEGAN = "VEGAN"
         val VEGETARIAN = "VEGETARIAN"
