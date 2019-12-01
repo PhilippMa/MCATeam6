@@ -209,37 +209,20 @@ class BarcodeFragment : Fragment(), OnClickListener {
                     if (it.isSuccessful) {
                         var productName = it.result?.name_english
                         if (it.result == null) {
-                            // Initialize a new instance of
                             val builder = AlertDialog.Builder(context!!)
-
-                            // Set the alert dialog title
                             builder.setTitle("Product not found")
-
-                            // Display a message on alert dialog
                             builder.setMessage("Product does not exist on our database. Would you like to add it?")
-
-                            // Set a positive button and its click listener on alert dialog
                             builder.setPositiveButton("YES"){dialog, which ->
-                                // Do something when user press the positive button
                                 Toast.makeText(context,":)",Toast.LENGTH_SHORT).show()
-
                                 val intent = Intent().setClass(context!!, AddProductActivity::class.java)
                                 startActivity(intent)
                             }
-
-
-                            // Display a negative button on alert dialog
                             builder.setNegativeButton("No"){dialog, which ->
                                 Toast.makeText(context,":(",Toast.LENGTH_SHORT).show()
                                 this.onResume()
                             }
-
-                            // Finally, make the alert dialog using builder
                             val dialog: AlertDialog = builder.create()
-
-                            // Display the alert dialog on app interface
                             dialog.show()
-
                         } else {
                             Toast.makeText(context, productName, Toast.LENGTH_SHORT)
                             //Call Product Info intent
