@@ -1,6 +1,7 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
@@ -14,12 +15,46 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
 import com.example.mcateam6.adapters.SearchItemAdapter
 import com.example.mcateam6.database.RemoteDatabase
+import com.example.mcateam6.datatypes.Attribute
+import com.example.mcateam6.datatypes.Tag
 import com.google.android.gms.tasks.Task
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.mancj.materialsearchbar.MaterialSearchBar
+import com.yalantis.filter.adapter.FilterAdapter
+import com.yalantis.filter.widget.FilterItem
 import kotlinx.android.synthetic.main.fragment_search.*
+import androidx.core.content.ContextCompat
+import com.example.mcateam6.activities.MainActivity
+import com.yalantis.filter.listener.FilterListener
+import com.yalantis.filter.widget.Filter
+import java.util.ArrayList
 
 
-class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSearchBar.OnSearchActionListener {
+class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSearchBar.OnSearchActionListener, FilterListener<Tag> {
+    override fun onFilterDeselected(item: Tag) {
+    }
+
+    override fun onFilterSelected(item: Tag) {
+    }
+
+    override fun onFiltersSelected(filters: ArrayList<Tag>) {
+        var newItemList = mutableListOf<RemoteDatabase.FirebaseProduct>()
+        mSearchedResult?.forEach {
+            for (tag in filters) {
+                val b = it.attributes.get(tag.getText())?.toBoolean() ?: false
+                if (b) {
+                    newItemList.add(it)
+                }
+            }
+        }
+        itemAdapter.updateItemList(newItemList)
+    }
+
+    override fun onNothingSelected() {
+        itemAdapter.updateItemList(mSearchedResult)
+    }
+
     val db = RemoteDatabase()
     private val ITEM_ALL = 0
     private val ITEM_KOREAN = 1
@@ -30,6 +65,13 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
     lateinit var recyclerView: RecyclerView
     lateinit var tvNoItem: TextView
+    lateinit var chipGroup: ChipGroup
+    lateinit var mFilter: Filter<Tag>
+
+    var mSearchedResult: List<RemoteDatabase.FirebaseProduct>? = listOf()
+
+    var mTitles: MutableList<String>  = mutableListOf()
+    var mColors: IntArray = intArrayOf()
 
     var itemIndex = 0
 
@@ -53,7 +95,33 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
         tvNoItem = v.findViewById(R.id.tv_no_item)
 
+        mFilter = v.findViewById(R.id.filter)
+        initialFilter()
         return v
+    }
+    fun initialFilter() {
+        mColors = resources.getIntArray(R.array.filter_color)
+        var idx = 0
+        var tags: MutableList<Tag> = mutableListOf()
+        Attribute.values().forEach {
+            mTitles.add(it.name)
+            tags.add(Tag(it.name, mColors[idx++]))
+        }
+
+        mFilter.adapter = Adapter(tags)
+        mFilter.listener = this
+
+        mFilter.build()
+    }
+
+    fun initialChip() {
+        Attribute.values().forEach {
+//            mTitles.add(it.name)
+            var chip = Chip(activity)
+            chip.text = it.name
+            chip.isCheckable = true
+            chipGroup.addView(chip)
+        }
     }
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when(item?.itemId) {
@@ -106,6 +174,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                     false -> {
                         setItemMode()
                         itemAdapter.updateWholeData(it.result)
+                        mSearchedResult = it.result
                     }
                 }
             } else {
@@ -120,5 +189,24 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     private fun setItemMode() {
         tvNoItem.visibility = View.GONE
         recyclerView.visibility = View.VISIBLE
+    }
+    inner class Adapter(items: List<Tag>): FilterAdapter<Tag>(items) {
+        override fun createView(position: Int, item: Tag): FilterItem {
+            val context = activity as MainActivity
+            val filterItem = FilterItem(context)
+
+            filterItem.strokeColor = android.R.color.black
+            filterItem.textColor = android.R.color.black
+            filterItem.cornerRadius = 14F
+            filterItem.checkedTextColor =
+                ContextCompat.getColor(context, android.R.color.white)
+            filterItem.color = ContextCompat.getColor(context, android.R.color.white)
+            filterItem.checkedColor = mColors[position]
+            filterItem.text = item.getText()
+            filterItem.deselect()
+
+            return filterItem
+        }
+
     }
 }
