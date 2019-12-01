@@ -28,8 +28,16 @@ class ProductInfoActivity : AppCompatActivity() {
                 text_description.text = product?.description
 
                 val attr = product?.attributes
-                text_vegan.text = "Vegan: ${attr?.get("VEGAN")}"
-                text_vegetarian.text = "Vegetarian: ${attr?.get("VEGETARIAN")}"
+                if (attr?.get("VEGAN") == "true") {
+                    image_vegan.setImageDrawable(getDrawable(android.R.drawable.checkbox_on_background))
+                } else {
+                    image_vegan.setImageDrawable(getDrawable(android.R.drawable.checkbox_off_background))
+                }
+                if (attr?.get("VEGETARIAN") == "true") {
+                    image_vegetarian.setImageDrawable(getDrawable(android.R.drawable.checkbox_on_background))
+                } else {
+                    image_vegetarian.setImageDrawable(getDrawable(android.R.drawable.checkbox_off_background))
+                }
 
                 val imageTask = db.downloadImageSmall(id)
                 imageTask.addOnCompleteListener{it2 ->
