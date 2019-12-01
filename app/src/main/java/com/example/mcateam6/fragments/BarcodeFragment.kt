@@ -10,6 +10,7 @@ import android.hardware.Camera
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -17,6 +18,8 @@ import com.google.android.material.chip.Chip
 import com.google.common.base.Objects
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductActivity
+import com.example.mcateam6.activities.MainActivity
+import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.kotlin.camera.GraphicOverlay
 import com.example.mcateam6.kotlin.camera.WorkflowModel
 import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
@@ -28,10 +31,12 @@ import com.example.mcateam6.kotlin.camera.CameraSourcePreview
 import com.example.mcateam6.kotlin.settings.SettingsActivity
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import java.io.IOException
-import java.util.ArrayList
+import androidx.appcompat.app.AlertDialog;
 
 
 class BarcodeFragment : Fragment(), OnClickListener {
+
+    val db = RemoteDatabase()
 
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
@@ -92,6 +97,7 @@ class BarcodeFragment : Fragment(), OnClickListener {
         cameraSource?.setFrameProcessor(BarcodeProcessor(graphicOverlay!!, workflowModel!!))
         workflowModel?.setWorkflowState(WorkflowState.DETECTING)
     }
+
 
     override fun onPause() {
         super.onPause()
@@ -197,9 +203,54 @@ class BarcodeFragment : Fragment(), OnClickListener {
 
         workflowModel?.detectedBarcode?.observe(this, Observer { barcode ->
             if (barcode != null) {
-                val barcodeFieldList = ArrayList<BarcodeField>()
+                Toast.makeText(context, barcode.rawValue, Toast.LENGTH_SHORT).show()
+                val task = db.getProductById(barcode.rawValue!!)
+                task?.addOnCompleteListener{
+                    if (it.isSuccessful) {
+                        var productName = it.result?.name_english
+                        if (it.result == null) {
+                            // Initialize a new instance of
+                            val builder = AlertDialog.Builder(context!!)
+
+                            // Set the alert dialog title
+                            builder.setTitle("Product not found")
+
+                            // Display a message on alert dialog
+                            builder.setMessage("Product does not exist on our database. Would you like to add it?")
+
+                            // Set a positive button and its click listener on alert dialog
+                            builder.setPositiveButton("YES"){dialog, which ->
+                                // Do something when user press the positive button
+                                Toast.makeText(context,":)",Toast.LENGTH_SHORT).show()
+
+                                val intent = Intent().setClass(context!!, AddProductActivity::class.java)
+                                startActivity(intent)
+                            }
+
+
+                            // Display a negative button on alert dialog
+                            builder.setNegativeButton("No"){dialog, which ->
+                                Toast.makeText(context,":(",Toast.LENGTH_SHORT).show()
+                                this.onResume()
+                            }
+
+                            // Finally, make the alert dialog using builder
+                            val dialog: AlertDialog = builder.create()
+
+                            // Display the alert dialog on app interface
+                            dialog.show()
+
+                        } else {
+                            Toast.makeText(context, productName, Toast.LENGTH_SHORT)
+                            //Call Product Info intent
+                        }
+                    } else {
+                        Toast.makeText(context, "Failed to lookup product by barcode", Toast.LENGTH_SHORT)
+                    }
+                }
+/*                val barcodeFieldList = ArrayList<BarcodeField>()
                 barcodeFieldList.add(BarcodeField("Raw Value", barcode.rawValue ?: ""))
-                BarcodeResultFragment.show(fragmentManager!!, barcodeFieldList)
+                BarcodeResultFragment.show(fragmentManager!!, barcodeFieldList)*/
             }
         })
     }
