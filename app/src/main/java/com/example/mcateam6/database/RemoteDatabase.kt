@@ -102,7 +102,8 @@ class RemoteDatabase {
         fun getIngredientProducts(): Task<List<FirebaseProduct>> {
             return Tasks.whenAllSuccess(ingredients.map { documentReference ->
                 documentReference!!.get().continueWith { task: Task<DocumentSnapshot> ->
-                    task.result!!.toObject(FirebaseProduct::class.java)
+                    val doc = task.result!!
+                    convertToFirebaseProduct(doc)
                 }
             })
         }
@@ -333,10 +334,12 @@ class RemoteDatabase {
             }
     }
 
-    private fun convertToFirebaseProduct(doc: DocumentSnapshot): FirebaseProduct? {
-        val obj = doc.toObject(FirebaseProduct::class.java)
-        obj!!.id = doc.id
-        return obj
+    companion object {
+        fun convertToFirebaseProduct(doc: DocumentSnapshot): FirebaseProduct? {
+            val obj = doc.toObject(FirebaseProduct::class.java)
+            obj!!.id = doc.id
+            return obj
+        }
     }
 
     /**
