@@ -23,6 +23,7 @@ import com.example.mcateam6.fragments.ProductDescriptionFragmentDirections
 import com.example.mcateam6.fragments.ProductGeneralInformationFragmentDirections
 import com.example.mcateam6.fragments.ProductIngredientsFragmentDirections
 import com.example.mcateam6.viewmodels.PagedFormModel
+import com.example.mcateam6.viewmodels.ProductListViewModel
 import com.example.mcateam6.viewmodels.ProductViewModel
 import com.github.razir.progressbutton.*
 import kotlinx.android.synthetic.main.activity_add_product.*
@@ -69,6 +70,7 @@ enum class AddProductFormPage {
 class AddProductActivity : AppCompatActivity() {
 
     private lateinit var productModel: ProductViewModel
+    private lateinit var productListModel: ProductListViewModel
     private lateinit var pagedFormModel: PagedFormModel
 
     private var nextInProgress = false
@@ -200,6 +202,17 @@ class AddProductActivity : AppCompatActivity() {
 
     private fun initViewModels() {
         productModel = ViewModelProviders.of(this)[ProductViewModel::class.java]
+
+        productListModel = ViewModelProviders.of(this)[ProductListViewModel::class.java]
+
+        val db = RemoteDatabase()
+
+        db.signIn().addOnSuccessListener {
+            db.getAllProducts().addOnSuccessListener { fbProductList ->
+                productListModel.productList = ArrayList(fbProductList)
+            }
+        }
+
         pagedFormModel = ViewModelProviders.of(this)[PagedFormModel::class.java]
 
         pagedFormModel.currentPage.observe(this, Observer { page ->

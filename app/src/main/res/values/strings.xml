@@ -106,5 +106,8 @@
     <string name="pref_summary_delay_loading_barcode_result">Will show the loading spinner for 2s</string>
     <string name="product_image">Product Image</string>
     <string name="scan">Scan</string>
+    <string name="search_hint">Search ingredients</string>
+    <string name="expand_search_card">Add Ingredients</string>
+    <string name="english_and_korean_name">%s (%s)</string>
 
 </resources>

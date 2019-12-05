@@ -30,5 +30,5 @@
     <color name="barcode_field_value">#797979</color>
     <color name="barcode_field_box_stroke">#757575</color>
     <color name="product_description">#5F6368</color>
-    <color name="materail_gray_700">#616161</color>
+    <color name="material_gray_700">#616161</color>
 </resources>

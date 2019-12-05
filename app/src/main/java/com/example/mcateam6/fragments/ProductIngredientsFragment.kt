@@ -1,34 +1,43 @@
 package com.example.mcateam6.fragments
 
 
+import android.animation.AnimatorSet
+import android.animation.ValueAnimator
+import android.app.SearchManager
+import android.content.Context.SEARCH_SERVICE
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.EditText
+import android.widget.ImageView
+import android.widget.SearchView
 import android.widget.TextView
-import android.widget.Toast
+import androidx.cardview.widget.CardView
+import androidx.core.animation.doOnEnd
 import androidx.core.view.children
+import androidx.recyclerview.widget.DefaultItemAnimator
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.AddProductFormPage
-import com.example.mcateam6.database.RemoteDatabase
+import com.example.mcateam6.adapters.FilteredProductAdapter
+import com.example.mcateam6.adapters.FilteredProductAdapterListener
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Product
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 import java.util.*
 
-class ProductIngredientsFragment : AddProductFormPageFragment() {
+
+class ProductIngredientsFragment : AddProductFormPageFragment(), FilteredProductAdapterListener {
 
     override val formPage = AddProductFormPage.INGREDIENTS
 
     private val notVeganIngr = ArrayList<String>()
     private val notVegetarianIngr = ArrayList<String>()
 
-    private lateinit var addButton: Button
-    private lateinit var ingredientsEdit: EditText
     private lateinit var ingredientsChips: ChipGroup
     private lateinit var vegChips: ChipGroup
     private lateinit var noneChip: Chip
@@ -36,6 +45,16 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
     private lateinit var veganChip: Chip
     private lateinit var vegetarianDisabledText: TextView
     private lateinit var veganDisabledText: TextView
+
+    private lateinit var collapsedCard: CardView
+    private lateinit var expandedCard: CardView
+    private lateinit var expandCardText: TextView
+    private lateinit var collapseCardImage: ImageView
+
+    private var collapsedHeight = 0
+    private var collapsedWidth = 0
+
+    private lateinit var productAdapter: FilteredProductAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -48,15 +67,119 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
 
         findViews(v)
 
-        setAddButtonClickListener()
-
         setVegChipsCheckedChangeListener()
 
         loadIngredientsFromModel()
 
         updateDietaryConstraints()
 
+        initSearch(v)
+
+        initCardAnimation()
+
         return v
+    }
+
+    private fun initCardAnimation() {
+        collapseCardImage.setOnClickListener {
+            collapsedCard.visibility = View.VISIBLE
+            expandedCard.visibility = View.INVISIBLE
+            slideView(
+                collapsedCard,
+                collapsedHeight,
+                collapsedWidth
+            ) {
+                expandCardText.visibility = View.VISIBLE
+                collapsedCard.isEnabled = true
+            }
+        }
+
+        collapsedCard.setOnClickListener {
+            collapsedWidth = collapsedCard.width
+            collapsedHeight = collapsedCard.height
+
+            collapsedCard.isEnabled = false
+            expandCardText.visibility = View.INVISIBLE
+            slideView(
+                collapsedCard,
+                expandedCard.height,
+                expandedCard.width
+            ) {
+                expandedCard.visibility = View.VISIBLE
+                collapsedCard.visibility = View.INVISIBLE
+            }
+        }
+    }
+
+    private fun initSearch(v: View) {
+        productAdapter = FilteredProductAdapter(activity!!, productListModel.productList, this)
+
+        val recyclerView: RecyclerView = v.findViewById(R.id.product_recycler)
+
+        recyclerView.apply {
+            layoutManager = LinearLayoutManager(activity!!.applicationContext)
+            itemAnimator = DefaultItemAnimator()
+            adapter = productAdapter
+        }
+
+        val searchManager = activity!!.getSystemService(SEARCH_SERVICE) as SearchManager
+        val searchView: SearchView = v.findViewById(R.id.ingredient_search)
+        searchView.setSearchableInfo(
+            searchManager.getSearchableInfo(activity!!.componentName)
+        )
+        searchView.maxWidth = Integer.MAX_VALUE
+        searchView.isSubmitButtonEnabled = false
+
+        // listening to search query text change
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String): Boolean {
+                // filter recycler view when query submitted
+                productAdapter.filter.filter(query)
+                return false
+            }
+
+            override fun onQueryTextChange(query: String): Boolean {
+                // filter recycler view when text is changed
+                productAdapter.filter.filter(query)
+                return false
+            }
+        })
+    }
+
+    private fun slideView(
+        view: View,
+        heightEnd: Int,
+        widthEnd: Int,
+        doOnEnd: () -> Unit = {}
+    ) {
+        val slideAnimator = ValueAnimator
+            .ofFloat(0f, 1f)
+            .setDuration(500)
+
+        val heightStart = view.height
+        val widthStart = view.width
+        val heightDiff = heightEnd - heightStart
+        val widthDiff = widthEnd - widthStart
+
+        /* We use an update listener which listens to each tick
+         * and manually updates the height of the view  */
+
+        slideAnimator.addUpdateListener { anim ->
+            val ratio = anim.animatedValue as Float
+            view.layoutParams.height = heightStart + (heightDiff * ratio).toInt()
+            view.layoutParams.width = widthStart + (widthDiff * ratio).toInt()
+            view.requestLayout()
+        }
+
+        /*  We use an animationSet to play the animation  */
+
+        AnimatorSet().apply {
+            interpolator = AccelerateDecelerateInterpolator()
+            play(slideAnimator)
+            start()
+        }.doOnEnd {
+            doOnEnd()
+        }
     }
 
     private fun loadIngredientsFromModel() {
@@ -70,7 +193,8 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
 
         when {
             productModel.attributes[Attribute.VEGAN] != false -> veganChip.isChecked = true
-            productModel.attributes[Attribute.VEGETARIAN] != false -> vegetarianChip.isChecked = true
+            productModel.attributes[Attribute.VEGETARIAN] != false -> vegetarianChip.isChecked =
+                true
             else -> noneChip.isChecked = true
         }
     }
@@ -81,41 +205,7 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         }
     }
 
-    private fun setAddButtonClickListener() {
-        addButton.setOnClickListener {
-            val ingredientName = ingredientsEdit.text.toString().trim()
-
-            if (ingredientName.isBlank()) return@setOnClickListener
-
-            if (productModel.ingredients.any { it.englishName == ingredientName }) return@setOnClickListener
-
-            RemoteDatabase().apply {
-                signIn()
-                getProductByEnglishName(ingredientName).addOnSuccessListener { fbProduct ->
-                    ingredientsEdit.setText("".toCharArray(), 0, 0)
-                    ingredientsEdit.setSelection(0)
-
-                    val product = fbProduct.toProduct()
-
-                    productModel.ingredients.add(product)
-                    if (product.attributes[Attribute.VEGAN] != true)
-                        notVeganIngr.add(product.englishName)
-                    if (product.attributes[Attribute.VEGETARIAN] != true)
-                        notVegetarianIngr.add(product.englishName)
-
-                    createChip(product, ingredientsChips)
-
-                    updateDietaryConstraints()
-                }.addOnFailureListener {
-                    Toast.makeText(activity, "Unknown ingredient", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
-    }
-
     private fun findViews(v: View) {
-        addButton = v.findViewById(R.id.add_button)
-        ingredientsEdit = v.findViewById(R.id.ingredients_edit)
         ingredientsChips = v.findViewById(R.id.ingredients_chips)
         vegChips = v.findViewById(R.id.veg_chips)
         noneChip = v.findViewById(R.id.none_chip)
@@ -123,6 +213,11 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         veganChip = v.findViewById(R.id.vegan_chip)
         vegetarianDisabledText = v.findViewById(R.id.vegetarian_disabled_text)
         veganDisabledText = v.findViewById(R.id.vegan_disabled_text)
+
+        collapsedCard = v.findViewById(R.id.collapsed_search_card)
+        expandedCard = v.findViewById(R.id.expanded_search_card)
+        expandCardText = v.findViewById(R.id.expand_card_text)
+        collapseCardImage = v.findViewById(R.id.collapse_card_image)
     }
 
     private fun updateDietaryConstraints() {
@@ -213,5 +308,21 @@ class ProductIngredientsFragment : AddProductFormPageFragment() {
         }
 
         chipGroup.addView(chip as View)
+    }
+
+    override fun onProductSelected(product: Product) {
+        if (productModel.ingredients.any {
+                it.id == product.id
+            }) return
+
+        productModel.ingredients.add(product)
+        if (product.attributes[Attribute.VEGAN] != true)
+            notVeganIngr.add(product.englishName)
+        if (product.attributes[Attribute.VEGETARIAN] != true)
+            notVegetarianIngr.add(product.englishName)
+
+        createChip(product, ingredientsChips)
+
+        updateDietaryConstraints()
     }
 }
