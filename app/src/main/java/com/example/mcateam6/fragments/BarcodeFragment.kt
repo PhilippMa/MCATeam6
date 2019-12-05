@@ -204,7 +204,7 @@ class BarcodeFragment : Fragment(), OnClickListener {
         workflowModel?.detectedBarcode?.observe(this, Observer { barcode ->
             if (barcode != null) {
                 Toast.makeText(context, barcode.rawValue, Toast.LENGTH_SHORT).show()
-                val task = db.getProductById(barcode.rawValue!!)
+                val task = db.getProductByBarcode(barcode.rawValue!!)
                 task?.addOnCompleteListener{
                     if (it.isSuccessful) {
                         var productName = it.result?.name_english
