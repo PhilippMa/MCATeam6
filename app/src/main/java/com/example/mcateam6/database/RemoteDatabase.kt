@@ -311,8 +311,12 @@ class RemoteDatabase {
         val query = prodColl.whereEqualTo("name_english", name).limit(1)
         return query.get()
             .continueWith { task: Task<QuerySnapshot> ->
-                val doc = task.result!!.documents[0]
-                convertToFirebaseProduct(doc)
+                val doc = task.result!!.documents.getOrNull(0)
+                if (doc != null) {
+                    convertToFirebaseProduct(doc)
+                } else {
+                    null
+                }
             }
     }
 
@@ -329,8 +333,12 @@ class RemoteDatabase {
         val query = prodColl.whereEqualTo("name_korean", name).limit(1)
         return query.get()
             .continueWith { task: Task<QuerySnapshot> ->
-                val doc = task.result!!.documents[0]
-                convertToFirebaseProduct(doc)
+                val doc = task.result!!.documents.getOrNull(0)
+                if (doc != null) {
+                    convertToFirebaseProduct(doc)
+                } else {
+                    null
+                }
             }
     }
 
@@ -354,8 +362,12 @@ class RemoteDatabase {
         val query = prodColl.whereEqualTo("barcode", barcode).limit(1)
         return query.get()
             .continueWith { task: Task<QuerySnapshot> ->
-                val doc = task.result!!.documents[0]
-                convertToFirebaseProduct(doc)
+                val doc = task.result!!.documents.getOrNull(0)
+                if (doc != null) {
+                    convertToFirebaseProduct(doc)
+                } else {
+                    null
+                }
             }
     }
 
