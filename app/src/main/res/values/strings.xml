@@ -5,7 +5,6 @@
     <string name="title_setting">Settings</string>
     <string name="english_name">English Name</string>
     <string name="korean_name">Korean Name</string>
-    <string name="description_optional">Description (Optional)</string>
     <string name="brand_optional">Brand (Optional)</string>
     <string name="ingredients">Ingredients</string>
     <string name="add">Add</string>
@@ -26,6 +25,12 @@
         <item quantity="one">Attribute \'%1$s\' is disabled because ingredient %3$s is not %2$s</item>
         <item quantity="other">Attribute \'%1$s\' is disabled because %3$s and %4$d other ingredients are not %2$s</item>
     </plurals>
+    <string name="product_image">Product Image</string>
+    <string name="scan">Scan</string>
+    <string name="search_hint">Search ingredients</string>
+    <string name="expand_search_card">Add Ingredients</string>
+    <string name="english_and_korean_name">%s (%s)</string>
+    <string name="optional_information">Optional Information</string>
 
     <string name="bottom_sheet_option_camera">Use Camera</string>
     <string name="bottom_sheet_option_gallery">Upload from Gallery</string>
@@ -104,10 +109,5 @@
     <string name="pref_key_delay_loading_barcode_result" translatable="false">barcode_dlbr</string>
     <string name="pref_title_delay_loading_barcode_result">Delay loading barcode result</string>
     <string name="pref_summary_delay_loading_barcode_result">Will show the loading spinner for 2s</string>
-    <string name="product_image">Product Image</string>
-    <string name="scan">Scan</string>
-    <string name="search_hint">Search ingredients</string>
-    <string name="expand_search_card">Add Ingredients</string>
-    <string name="english_and_korean_name">%s (%s)</string>
 
 </resources>
