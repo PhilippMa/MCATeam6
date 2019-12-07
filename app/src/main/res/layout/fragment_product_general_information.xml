@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/form_outer_margin"
+        android:layout_marginTop="@dimen/form_large_margin"
         android:layout_marginEnd="@dimen/form_outer_margin"
         android:hint="@string/english_name"
         app:hintAnimationEnabled="true"
@@ -19,7 +20,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/generalInfo_text"
         app:layout_constraintVertical_chainStyle="spread">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -39,7 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/form_outer_margin"
-        android:layout_marginTop="@dimen/form_large_margin"
+        android:layout_marginTop="@dimen/form_outer_margin"
         android:layout_marginEnd="@dimen/form_outer_margin"
         android:hint="@string/korean_name"
         app:hintAnimationEnabled="true"
@@ -61,14 +62,14 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/barcode_editLayout"
+        android:id="@+id/brand_editLayout"
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="@dimen/form_outer_margin"
-        android:layout_marginTop="@dimen/form_large_margin"
+        android:layout_marginTop="@dimen/form_outer_margin"
         android:layout_marginEnd="@dimen/form_outer_margin"
-        android:hint="@string/barcode_optional"
+        android:hint="@string/brand_optional"
         app:hintAnimationEnabled="true"
         app:hintEnabled="true"
         app:layout_constraintEnd_toEndOf="parent"
@@ -77,14 +78,28 @@
         app:layout_constraintTop_toBottomOf="@+id/kr_name_editLayout">
 
         <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/barcode_edit"
+            android:id="@+id/brand_edit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:fontFamily="@font/roboto"
-            android:inputType="number"
+            android:inputType="text"
             android:maxLength="30"
             android:maxLines="1" />
 
     </com.google.android.material.textfield.TextInputLayout>
+
+    <TextView
+        android:id="@+id/generalInfo_text"
+        style="@style/TextAppearance.MaterialComponents.Headline5"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/form_outer_margin"
+        android:layout_marginEnd="@dimen/form_outer_margin"
+        android:text="@string/general_information"
+        android:textAlignment="center"
+        android:textColor="@android:color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -23,19 +23,4 @@
 
     </com.example.mcateam6.kotlin.camera.CameraSourcePreview>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_product_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:scaleType="center"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:maxImageSize="30dp"
-        app:srcCompat="@drawable/ic_add_white_30dp"
-        app:tint="@color/white" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

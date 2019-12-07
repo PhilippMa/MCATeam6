@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="@dimen/dp_8"
+    android:layout_marginBottom="@dimen/dp_8"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_bottom_sheet_heading"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:layout_width="wrap_content"
+        android:layout_height="@dimen/dp_56"
+        android:layout_marginStart="@dimen/dp_16"
+        android:layout_marginEnd="@dimen/dp_16"
+        android:fontFamily="@font/roboto"
+        android:gravity="center"
+        android:text="@string/bottom_sheet_option_heading"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tv_btn_add_photo_camera"
+        style="@style/TextAppearance.MaterialComponents.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_48"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_camera_alt_dark_gray_24dp"
+        android:drawablePadding="@dimen/dp_32"
+        android:focusable="true"
+        android:fontFamily="@font/roboto"
+        android:gravity="start|center_vertical"
+        android:paddingStart="@dimen/dp_16"
+        android:paddingEnd="@dimen/dp_16"
+        android:text="@string/bottom_sheet_option_camera"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <TextView
+        android:id="@+id/tv_btn_add_photo_gallery"
+        style="@style/TextAppearance.MaterialComponents.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_photo_library_dark_gray_24dp"
+        android:drawablePadding="@dimen/dp_32"
+        android:focusable="true"
+        android:fontFamily="@font/roboto"
+        android:gravity="start|center_vertical"
+        android:paddingStart="@dimen/dp_16"
+        android:paddingEnd="@dimen/dp_16"
+        android:text="@string/bottom_sheet_option_gallery"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginStart="@dimen/dp_8"
+
+        android:layout_marginTop="@dimen/md_bottom_sheet_separator_top_margin"
+        android:layout_marginEnd="@dimen/dp_8"
+        android:layout_marginBottom="@dimen/dp_8"
+        android:background="@android:color/darker_gray" />
+
+    <TextView
+        android:id="@+id/tv_btn_remove_photo"
+        style="@style/TextAppearance.MaterialComponents.Body1"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_48"
+        android:layout_marginBottom="@dimen/dp_16"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:drawableStart="@drawable/ic_delete_dark_gray_24dp"
+        android:drawablePadding="@dimen/dp_32"
+        android:focusable="true"
+        android:fontFamily="@font/roboto"
+        android:gravity="start|center_vertical"
+        android:paddingStart="@dimen/dp_16"
+        android:paddingEnd="@dimen/dp_16"
+        android:text="@string/bottom_sheet_option_remove_photo"
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+</LinearLayout>

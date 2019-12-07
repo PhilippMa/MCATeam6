@@ -258,6 +258,21 @@ class RemoteDatabase {
             }
     }
 
+    /**
+     * Returns a list of all products in the database
+     * @return task of the type List<FirebaseProduct>
+     * @see FirebaseProduct
+     * @see Task
+     */
+    fun getAllProducts(): Task<List<FirebaseProduct>> {
+        return prodColl.get()
+            .continueWith { task: Task<QuerySnapshot> ->
+                task.result!!.documents.mapNotNull { doc ->
+                    convertToFirebaseProduct(doc)
+                }
+            }
+    }
+
 
     /**
      * Returns an object of the class DocumentSnapshot with the id from the database.
