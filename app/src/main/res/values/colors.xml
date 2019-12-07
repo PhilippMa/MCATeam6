@@ -33,6 +33,7 @@
     <color name="material_gray_700">#616161</color>
 
     <array name="filter_color">
+        <item name="all" type="color">#827f93</item>
         <item name="vegan" type="color">#c467f4</item>
         <item name="vegetarian" type="color">#3b9aee</item>
     </array>

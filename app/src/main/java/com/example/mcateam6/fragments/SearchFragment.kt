@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
@@ -18,14 +19,14 @@ import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Tag
 import com.google.android.gms.tasks.Task
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.mancj.materialsearchbar.MaterialSearchBar
 import com.yalantis.filter.adapter.FilterAdapter
 import com.yalantis.filter.widget.FilterItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mcateam6.activities.MainActivity
+import com.yalantis.filter.animator.FiltersListItemAnimator
 import com.yalantis.filter.listener.FilterListener
 import com.yalantis.filter.widget.Filter
 import java.util.ArrayList
@@ -44,7 +45,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
             for (tag in filters) {
                 val b = it.attributes.get(tag.getText())?.toBoolean() ?: false
                 if (b) {
-                    newItemList.add(it)
+                    if (!newItemList.contains(it)) newItemList.add(it)
                 }
             }
         }
@@ -65,7 +66,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
     lateinit var recyclerView: RecyclerView
     lateinit var tvNoItem: TextView
-    lateinit var chipGroup: ChipGroup
     lateinit var mFilter: Filter<Tag>
 
     var mSearchedResult: List<RemoteDatabase.FirebaseProduct>? = listOf()
@@ -92,7 +92,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         itemAdapter = SearchItemAdapter(context, itemList)
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = GridLayoutManager(activity, 1)
-
+        recyclerView.itemAnimator = FiltersListItemAnimator()
         tvNoItem = v.findViewById(R.id.tv_no_item)
 
         mFilter = v.findViewById(R.id.filter)
@@ -101,8 +101,8 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     }
     fun initialFilter() {
         mColors = resources.getIntArray(R.array.filter_color)
-        var idx = 0
         var tags: MutableList<Tag> = mutableListOf()
+        var idx = 1
         Attribute.values().forEach {
             mTitles.add(it.name)
             tags.add(Tag(it.name, mColors[idx++]))
@@ -114,15 +114,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         mFilter.build()
     }
 
-    fun initialChip() {
-        Attribute.values().forEach {
-//            mTitles.add(it.name)
-            var chip = Chip(activity)
-            chip.text = it.name
-            chip.isCheckable = true
-            chipGroup.addView(chip)
-        }
-    }
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when(item?.itemId) {
             R.id.item_all -> {
@@ -195,13 +186,13 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
             val context = activity as MainActivity
             val filterItem = FilterItem(context)
 
-            filterItem.strokeColor = android.R.color.black
-            filterItem.textColor = android.R.color.black
-            filterItem.cornerRadius = 14F
+            filterItem.strokeColor = mColors[0]
+            filterItem.textColor = mColors[0]
+            filterItem.color = ContextCompat.getColor(context, android.R.color.white)
+
             filterItem.checkedTextColor =
                 ContextCompat.getColor(context, android.R.color.white)
-            filterItem.color = ContextCompat.getColor(context, android.R.color.white)
-            filterItem.checkedColor = mColors[position]
+            filterItem.checkedColor = mColors[position+1]
             filterItem.text = item.getText()
             filterItem.deselect()
 
