@@ -123,13 +123,13 @@ class AddProductActivity : AppCompatActivity() {
                         val imageStream = contentResolver.openInputStream(uri)
                         if (imageStream != null) {
                             db.uploadImage(ids[0], imageStream).addOnSuccessListener {
-                                finish()
+                                finishSuccess()
                             }
                         } else {
-                            finish()
+                            finishSuccess()
                         }
                     } else {
-                        finish()
+                        finishSuccess()
                     }
                 }.addOnFailureListener {
                     create_button.hideProgress(R.string.create)
@@ -142,6 +142,11 @@ class AddProductActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    private fun finishSuccess() {
+        Toast.makeText(this, "Product was uploaded successfully!", Toast.LENGTH_LONG).show()
+        finish()
     }
 
     private fun setNextButtonClickListener() {
