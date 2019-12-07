@@ -34,6 +34,7 @@ class ProductInfoActivity : AppCompatActivity() {
                 val product = it.result
                 text_english_name.text = product?.name_english
                 text_korean_name.text = product?.name_korean
+                text_brand.text = product?.brand
                 text_description.text = product?.description
 
                 val attr = product?.attributes
