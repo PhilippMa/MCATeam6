@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="dietary_restrictions_category"
+        android:title="Dietary Restrictions">
+
+        <SwitchPreferenceCompat
+            android:key="vegan"
+            android:title="Vegan" />
+
+        <SwitchPreferenceCompat
+            android:key="vegetarian"
+            android:title="Vegetarian" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>
