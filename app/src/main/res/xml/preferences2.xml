@@ -5,13 +5,13 @@
         android:key="dietary_restrictions_category"
         android:title="Dietary Restrictions">
 
-        <SwitchPreferenceCompat
-            android:key="vegan"
-            android:title="Vegan" />
-
-        <SwitchPreferenceCompat
-            android:key="vegetarian"
-            android:title="Vegetarian" />
+        <ListPreference
+            android:defaultValue="None"
+            android:entries="@array/diet_pref_entries"
+            android:entryValues="@array/diet_pref_values"
+            android:key="diet_pref"
+            android:summary="Click to choose your dietary preference"
+            android:title="Dietary Preference" />
 
     </PreferenceCategory>
 
