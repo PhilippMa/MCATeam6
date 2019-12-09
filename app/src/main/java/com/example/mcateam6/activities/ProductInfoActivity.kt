@@ -46,6 +46,12 @@ class ProductInfoActivity : AppCompatActivity() {
                 text_brand.text = product?.brand
                 text_description.text = product?.description
 
+                if (product?.brand != "") text_brand.visibility = View.VISIBLE
+                if (product?.description != "") {
+                    headline_description.visibility = View.VISIBLE
+                    text_description.visibility = View.VISIBLE
+                }
+
                 val attr = product?.attributes
                 val vegan = attr?.get("VEGAN")
                 val vegetarian = attr?.get("VEGETARIAN")
@@ -87,6 +93,10 @@ class ProductInfoActivity : AppCompatActivity() {
                 ingredientTask?.addOnCompleteListener { it3 ->
                     if (it3.isSuccessful) {
                         itemAdapter.updateWholeData(it3.result)
+                        if (!it3.result.isNullOrEmpty()) {
+                            headline_ingredients.visibility = View.VISIBLE
+                            text_description.visibility = View.VISIBLE
+                        }
                     } else {
                         val toast = Toast.makeText(this, "Failed to load ingredients", Toast.LENGTH_SHORT)
                         toast.show()
