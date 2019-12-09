@@ -1,92 +1,178 @@
 package com.example.mcateam6.fragments
 
 import android.Manifest
+import android.app.Activity
+import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Matrix
 import android.os.Bundle
-import android.util.Size
 import android.view.*
 import android.widget.Toast
-import androidx.camera.core.CameraX
-import androidx.camera.core.Preview
-import androidx.camera.core.PreviewConfig
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.LifecycleOwner
-import com.example.mcateam6.R
 import com.example.mcateam6.activities.MainActivity
+import android.graphics.SurfaceTexture
+import android.hardware.camera2.CameraDevice
+import android.util.Size
+import com.example.mcateam6.R
+import org.tensorflow.lite.Interpreter
+import org.tensorflow.lite.support.common.FileUtil
+import org.tensorflow.lite.support.common.TensorProcessor
+import org.tensorflow.lite.support.tensorbuffer.TensorBuffer
+import org.tensorflow.lite.support.image.TensorImage
+import android.graphics.Bitmap
+import android.media.ImageReader
+import android.util.Log
+import android.widget.Button
+import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.label.TensorLabel
+import java.io.FileInputStream
+import java.io.IOException
+import java.nio.MappedByteBuffer
+import java.nio.channels.FileChannel
 
-class ImageRecognizerFragment: Fragment(), LifecycleOwner {
+class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureView.SurfaceTextureListener, View.OnClickListener {
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.btn_classify -> {
+                val map = classify()
+                Log.d("TEST MAP", map.toString())
+            }
+        }
+    }
+
+    private lateinit var tflite: Interpreter
+    private var labels = mutableListOf<String>()
+    private var imageWidth: Int? = null
+    private var imageHeight: Int? = null
+    private lateinit var inputImageBuffer: TensorImage
+    private lateinit var outputProbabilityBuffer: TensorBuffer
+    private lateinit var probabilityProcessor: TensorProcessor
+//    private Bitmap frameBitmap;
+//    private Classifier classifier;
+    private val PROBABILITY_MIN = 0.0f;
+    private val PROBABILITY_MAX = 1.0f;
+
+    override fun onCameraDeviceOpened(cameraDevice: CameraDevice?, cameraSize: Size?) {
+        if (cameraSize==null) return
+        val texture = viewFinder.surfaceTexture
+        texture.setDefaultBufferSize(cameraSize.width, cameraSize.height)
+        val surface = Surface(texture)
+
+        mCamera.CaptureSession_4(cameraDevice, surface)
+        mCamera.CaptureRequest_5(cameraDevice, surface)
+    }
+
+    override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
+    }
+
+    override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+    }
+
+    override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
+        return true
+    }
+
+    override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
+        openCamera()
+    }
+    protected fun classify(): Map<String, Float>? {
+        mCamera.takePicture()
+        val frameBitmap = mCamera.frameBitmap
+        if (frameBitmap==null||imageWidth===null||imageHeight===null) return null
+        val resized = Bitmap.createScaledBitmap(frameBitmap, imageWidth!!, imageHeight!!, true)
+        inputImageBuffer.load(resized)
+        tflite.run(inputImageBuffer.buffer, outputProbabilityBuffer.buffer.rewind())
+
+        val labeledProbability = TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer)).mapWithFloatValue
+        return labeledProbability
+    }
+    override fun onResume() {
+        super.onResume()
+        if (viewFinder.isAvailable) {
+            openCamera()
+        } else {
+            viewFinder.surfaceTextureListener = this
+        }
+    }
+
+    override fun onPause() {
+        closeCamera()
+        super.onPause()
+    }
+    fun closeCamera() {
+        mCamera.closeCamera()
+    }
     private val REQUEST_CODE_PERMISSIONS = 10
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
-    lateinit var viewFinder: TextureView
 
+    lateinit var viewFinder: TextureView
+    lateinit var btnClassify: Button
+    lateinit var mCamera: Camera2API
+
+    lateinit var v: View
+
+    private fun loadmodelFile(activity: Activity, MODEL_FILE:String): MappedByteBuffer{
+        resources.assets.openFd(MODEL_FILE)
+        val fd = (activity as MainActivity).assets.openFd(MODEL_FILE)
+        val inputStream = FileInputStream(fd.fileDescriptor)
+        val fileChannel = inputStream.channel
+        val startOffset = fd.startOffset
+        val declaredLength = fd.declaredLength
+        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
+    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val v = inflater.inflate(R.layout.fragment_image_recognizer, container, false)
+        v = inflater.inflate(R.layout.fragment_image_recognizer, container, false)
         viewFinder = v.findViewById(R.id.view_finder)
-        if (allPermissionsGranted()) {
-            viewFinder.post{ startCamera() }
-        } else {
-            ActivityCompat.requestPermissions(
-                activity as MainActivity, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
-            )
+        viewFinder.surfaceTextureListener = this
+
+        btnClassify = v.findViewById(R.id.btn_classify)
+        btnClassify.setOnClickListener(this)
+
+        try {
+            val labelsPath = "labels.txt"
+            labels = FileUtil.loadLabels(activity as MainActivity, labelsPath)
+
+            val modelPath = "mobilenet_v1_1.0_224_quant.tflite"
+            val tfliteModel = FileUtil.loadMappedFile(activity as MainActivity, modelPath)
+            val tfliteOptions = Interpreter.Options()
+            tfliteOptions.setNumThreads(2)
+
+            tflite = Interpreter(tfliteModel, tfliteOptions)
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+            activity?.finish()
         }
-        viewFinder.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
-            updateTransform()
-        }
+
+        var imageShape = tflite.getInputTensor(0).shape()
+        imageWidth = imageShape[1]
+        imageHeight = imageShape[2]
+        val imageDataType = tflite.getInputTensor(0).dataType()
+        inputImageBuffer = TensorImage(imageDataType)
+
+        val probabilityShape = tflite.getOutputTensor(0).shape()
+        val probabilityDataType = tflite.getOutputTensor(0).dataType()
+        outputProbabilityBuffer = TensorBuffer.createFixedSize(
+            probabilityShape, probabilityDataType
+        )
+        probabilityProcessor = TensorProcessor.Builder().add(
+            NormalizeOp(PROBABILITY_MIN, PROBABILITY_MAX)
+        ).build()
+
+        mCamera = Camera2API(this)
+        mCamera.setViewFinder(viewFinder)
         return v
     }
 
-    private fun startCamera() {
-        val previewConfig = PreviewConfig.Builder().apply {
-            setTargetResolution(Size(640, 480))
-        }.build()
-
-
-        // Build the viewfinder use case
-        val preview = Preview(previewConfig)
-
-        // Every time the viewfinder is updated, recompute layout
-        preview.setOnPreviewOutputUpdateListener {
-
-            // To update the SurfaceTexture, we have to remove it and re-add it
-            val parent = viewFinder.parent as ViewGroup
-            parent.removeView(viewFinder)
-            parent.addView(viewFinder, 0)
-
-            viewFinder.surfaceTexture = it.surfaceTexture
-            updateTransform()
-        }
-
-        CameraX.bindToLifecycle(this, preview)
+    fun openCamera() {
+        val cameraManager = mCamera.CameraManager_1(activity)
+        val cameraId = mCamera.CameraCharacteristics_2(cameraManager)
+        mCamera.CameraDevice_3(cameraManager, cameraId)
     }
-
-    private fun updateTransform() {
-        val matrix = Matrix()
-
-        // Compute the center of the view finder
-        val centerX = viewFinder.width / 2f
-        val centerY = viewFinder.height / 2f
-
-        // Correct preview output to account for display rotation
-        val rotationDegrees = when(viewFinder.display.rotation) {
-            Surface.ROTATION_0 -> 0
-            Surface.ROTATION_90 -> 90
-            Surface.ROTATION_180 -> 180
-            Surface.ROTATION_270 -> 270
-            else -> return
-        }
-        matrix.postRotate(-rotationDegrees.toFloat(), centerX, centerY)
-
-        // Finally, apply transformations to our TextureView
-        viewFinder.setTransform(matrix)
-    }
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -94,7 +180,7 @@ class ImageRecognizerFragment: Fragment(), LifecycleOwner {
     ) {
         if (requestCode==REQUEST_CODE_PERMISSIONS) {
             if (allPermissionsGranted()) {
-                viewFinder.post{ startCamera() }
+
             } else {
                 Toast.makeText(activity, "Camera Permissions are not granted", Toast.LENGTH_SHORT).show()
                 activity?.finish()
@@ -107,3 +193,4 @@ class ImageRecognizerFragment: Fragment(), LifecycleOwner {
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
+
