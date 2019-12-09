@@ -23,6 +23,7 @@ import android.graphics.Bitmap
 import android.media.ImageReader
 import android.util.Log
 import android.widget.Button
+import android.widget.TextView
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.label.TensorLabel
 import java.io.FileInputStream
@@ -35,7 +36,19 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
         when (v?.id) {
             R.id.btn_classify -> {
                 val map = classify()
-                Log.d("TEST MAP", map.toString())
+                Log.d("map", map.toString())
+                var maxProb = 0.0f
+                var maxKey = ""
+                map?.let{
+                    it.forEach {
+                        var prob = it.value
+                        if (prob >=maxProb) {
+                            maxProb = prob
+                            maxKey = it.key
+                        }
+                    }
+                    Toast.makeText(activity, maxKey, Toast.LENGTH_SHORT).show()
+                } ?: Toast.makeText(activity, "NO ITEM", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -47,8 +60,7 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
     private lateinit var inputImageBuffer: TensorImage
     private lateinit var outputProbabilityBuffer: TensorBuffer
     private lateinit var probabilityProcessor: TensorProcessor
-//    private Bitmap frameBitmap;
-//    private Classifier classifier;
+
     private val PROBABILITY_MIN = 0.0f;
     private val PROBABILITY_MAX = 1.0f;
 
@@ -111,15 +123,6 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
 
     lateinit var v: View
 
-    private fun loadmodelFile(activity: Activity, MODEL_FILE:String): MappedByteBuffer{
-        resources.assets.openFd(MODEL_FILE)
-        val fd = (activity as MainActivity).assets.openFd(MODEL_FILE)
-        val inputStream = FileInputStream(fd.fileDescriptor)
-        val fileChannel = inputStream.channel
-        val startOffset = fd.startOffset
-        val declaredLength = fd.declaredLength
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-    }
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -193,4 +196,3 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
         ) == PackageManager.PERMISSION_GRANTED
     }
 }
-
