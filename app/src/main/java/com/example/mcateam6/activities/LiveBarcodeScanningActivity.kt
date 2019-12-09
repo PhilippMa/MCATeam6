@@ -1,42 +1,47 @@
-package com.example.mcateam6.fragments
+/*
+ * Copyright 2019 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.*
+package com.example.mcateam6.activities
+
 import android.animation.AnimatorInflater
 import android.animation.AnimatorSet
 import android.content.Intent
-import android.hardware.Camera
+import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.view.View.OnClickListener
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.google.android.material.chip.Chip
-import com.google.common.base.Objects
 import com.example.mcateam6.R
-import com.example.mcateam6.activities.AddProductActivity
-import com.example.mcateam6.activities.MainActivity
-import com.example.mcateam6.database.RemoteDatabase
-import com.example.mcateam6.kotlin.camera.GraphicOverlay
-import com.example.mcateam6.kotlin.camera.WorkflowModel
-import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
-import com.example.mcateam6.kotlin.barcodedetection.BarcodeField
 import com.example.mcateam6.kotlin.barcodedetection.BarcodeProcessor
 import com.example.mcateam6.kotlin.barcodedetection.BarcodeResultFragment
 import com.example.mcateam6.kotlin.camera.CameraSource
 import com.example.mcateam6.kotlin.camera.CameraSourcePreview
-import com.example.mcateam6.kotlin.settings.SettingsActivity
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.example.mcateam6.kotlin.camera.GraphicOverlay
+import com.example.mcateam6.kotlin.camera.WorkflowModel
+import com.example.mcateam6.kotlin.camera.WorkflowModel.WorkflowState
+import com.google.android.material.chip.Chip
+import com.google.common.base.Objects
 import java.io.IOException
-import androidx.appcompat.app.AlertDialog;
 
+const val BARCODE_EXTRA = "BARCODE"
 
-class BarcodeFragment : Fragment(), OnClickListener {
-
-    val db = RemoteDatabase()
+/** Demonstrates the barcode scanning workflow using camera preview.  */
+class LiveBarcodeScanningActivity : AppCompatActivity(), OnClickListener {
 
     private var cameraSource: CameraSource? = null
     private var preview: CameraSourcePreview? = null
@@ -48,44 +53,31 @@ class BarcodeFragment : Fragment(), OnClickListener {
     private var workflowModel: WorkflowModel? = null
     private var currentWorkflowState: WorkflowState? = null
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
 
-        val v = inflater.inflate(R.layout.activity_live_barcode_kotlin, container, false)
+        setContentView(R.layout.activity_live_barcode_scanning)
+        preview = findViewById(R.id.camera_preview)
+        graphicOverlay = findViewById<GraphicOverlay>(R.id.camera_preview_graphic_overlay).apply {
+            setOnClickListener(this@LiveBarcodeScanningActivity)
+            cameraSource = CameraSource(this)
+        }
 
-        preview = v.findViewById(R.id.camera_preview)
-        graphicOverlay = v.findViewById<GraphicOverlay>(R.id.camera_preview_graphic_overlay)
-            .apply {
-                setOnClickListener(this@BarcodeFragment)
-                cameraSource = CameraSource(this)
-            }
-
-        promptChip = v.findViewById(R.id.bottom_prompt_chip)
+        promptChip = findViewById(R.id.bottom_prompt_chip)
         promptChipAnimator =
-            (AnimatorInflater.loadAnimator(activity, R.animator.bottom_prompt_chip_enter) as AnimatorSet).apply {
+            (AnimatorInflater.loadAnimator(this, R.animator.bottom_prompt_chip_enter) as AnimatorSet).apply {
                 setTarget(promptChip)
             }
 
-/*        view?.findViewById<View>(R.id.close_button)?.setOnClickListener(this)
-        flashButton = view?.findViewById<View>(R.id.flash_button)?.apply {
-            setOnClickListener(@LiveBarcodeScanningActivity)
+/*        findViewById<View>(R.id.close_button).setOnClickListener(this)
+        flashButton = findViewById<View>(R.id.flash_button).apply {
+            setOnClickListener(this@LiveBarcodeScanningActivity)
         }
-        settingsButton = view?.findViewById<View>(R.id.settings_button)?.apply {
+        settingsButton = findViewById<View>(R.id.settings_button).apply {
             setOnClickListener(this@LiveBarcodeScanningActivity)
         }*/
 
-        v.findViewById<FloatingActionButton>(R.id.add_product_button).setOnClickListener {
-            val intent = Intent().setClass(context!!, AddProductActivity::class.java)
-            startActivity(intent)
-        }
-
-
         setUpWorkflowModel()
-
-        return v
     }
 
     override fun onResume() {
@@ -98,6 +90,10 @@ class BarcodeFragment : Fragment(), OnClickListener {
         workflowModel?.setWorkflowState(WorkflowState.DETECTING)
     }
 
+    override fun onPostResume() {
+        super.onPostResume()
+        BarcodeResultFragment.dismiss(supportFragmentManager)
+    }
 
     override fun onPause() {
         super.onPause()
@@ -131,7 +127,6 @@ class BarcodeFragment : Fragment(), OnClickListener {
             }
         }*/
     }
-
 
     private fun startCameraPreview() {
         val workflowModel = this.workflowModel ?: return
@@ -203,34 +198,8 @@ class BarcodeFragment : Fragment(), OnClickListener {
 
         workflowModel?.detectedBarcode?.observe(this, Observer { barcode ->
             if (barcode != null) {
-                //Toast.makeText(context, barcode.rawValue, Toast.LENGTH_SHORT).show()
-                val task = db.getProductByBarcode(barcode.rawValue!!)
-                task?.addOnCompleteListener{
-                    if (it.isSuccessful) {
-                        var productName = it.result?.name_english
-                        Toast.makeText(context,it.result?.name_english,Toast.LENGTH_SHORT).show()
-                        Toast.makeText(context, productName, Toast.LENGTH_SHORT)
-                        //Call Product Info intent
-                    } else {
-                        val builder = AlertDialog.Builder(context!!)
-                        builder.setTitle("Product not found")
-                        builder.setMessage("Product does not exist on our database. Would you like to add it?")
-                        builder.setPositiveButton("YES"){dialog, which ->
-                            Toast.makeText(context,":)",Toast.LENGTH_SHORT).show()
-                            val intent = Intent().setClass(context!!, AddProductActivity::class.java)
-                            startActivity(intent)
-                        }
-                        builder.setNegativeButton("No"){dialog, which ->
-                            Toast.makeText(context,":(",Toast.LENGTH_SHORT).show()
-                            this.onResume()
-                        }
-                        val dialog: AlertDialog = builder.create()
-                        dialog.show()
-                    }
-                }
-/*                val barcodeFieldList = ArrayList<BarcodeField>()
-                barcodeFieldList.add(BarcodeField("Raw Value", barcode.rawValue ?: ""))
-                BarcodeResultFragment.show(fragmentManager!!, barcodeFieldList)*/
+                setResult(RESULT_OK, Intent().putExtra(BARCODE_EXTRA, barcode.rawValue))
+                finish()
             }
         })
     }
@@ -238,5 +207,4 @@ class BarcodeFragment : Fragment(), OnClickListener {
     companion object {
         private const val TAG = "LiveBarcodeActivity"
     }
-
 }

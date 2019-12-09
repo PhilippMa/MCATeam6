@@ -15,6 +15,7 @@ import com.google.firebase.firestore.DocumentReference
  */
 open class Product(
     var id: String = "",
+    var brand: String = "",
     var englishName: String = "",
     var koreanName: String = "",
     var barcode: String? = null,
@@ -34,15 +35,16 @@ open class Product(
 */
     constructor(
         id: String,
+        brand: String,
         englishName: String,
         koreanName: String,
         barcode: String?,
         description: String,
         attributes: Map<Attribute, Boolean>
-    ) : this(id, englishName, koreanName, barcode, description, emptyList(), attributes, null)
+    ) : this(id, brand, englishName, koreanName, barcode, description, emptyList(), attributes, null)
 
 
-    constructor(englishName: String, koreanName: String, barcode: String?, description: String, ingredients: List<Product>, attributes: Map<Attribute, Boolean>) : this("", englishName, koreanName, barcode, description, ingredients, attributes, null)
+    constructor(brand: String, englishName: String, koreanName: String, barcode: String?, description: String, ingredients: List<Product>, attributes: Map<Attribute, Boolean>) : this("", brand, englishName, koreanName, barcode, description, ingredients, attributes, null)
 
     companion object {
         fun equals(p: Product, fP: RemoteDatabase.FirebaseProduct): Boolean {

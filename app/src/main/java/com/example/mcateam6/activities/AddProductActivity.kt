@@ -1,6 +1,7 @@
 package com.example.mcateam6.activities
 
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -17,13 +18,14 @@ import androidx.navigation.findNavController
 import com.example.mcateam6.R
 import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Product
+import com.example.mcateam6.fragments.AddProductFormPageAsyncFragment
 import com.example.mcateam6.fragments.ProductDescriptionFragmentDirections
 import com.example.mcateam6.fragments.ProductGeneralInformationFragmentDirections
 import com.example.mcateam6.fragments.ProductIngredientsFragmentDirections
 import com.example.mcateam6.viewmodels.PagedFormModel
+import com.example.mcateam6.viewmodels.ProductListViewModel
 import com.example.mcateam6.viewmodels.ProductViewModel
-import com.google.android.gms.tasks.Task
-import com.google.firebase.firestore.DocumentReference
+import com.github.razir.progressbutton.*
 import kotlinx.android.synthetic.main.activity_add_product.*
 
 enum class AddProductFormPage {
@@ -67,8 +69,12 @@ enum class AddProductFormPage {
 
 class AddProductActivity : AppCompatActivity() {
 
-    lateinit var productModel: ProductViewModel
-    lateinit var pagedFormModel: PagedFormModel
+    private lateinit var productModel: ProductViewModel
+    private lateinit var productListModel: ProductListViewModel
+    private lateinit var pagedFormModel: PagedFormModel
+
+    private var nextInProgress = false
+    private var createInProgress = false
 
     private val navController: NavController by lazy { findNavController(R.id.add_product_nav_host_fragment) }
 
@@ -78,21 +84,56 @@ class AddProductActivity : AppCompatActivity() {
 
         initViewModels()
 
-        previous_button.setOnClickListener {
-            navigatePrevious()
-        }
+        setPreviousButtonClickListener()
 
-        next_button.setOnClickListener {
-            navigateNext()
-        }
+        setNextButtonClickListener()
+
+        setCreateButtonClickListener()
+
+        setCloseButtonClickListener()
+
+        setFullScreen()
+    }
+
+    private fun setCloseButtonClickListener() {
+        close_button.setOnClickListener { finish() }
+    }
+
+    private fun setCreateButtonClickListener() {
+        bindProgressButton(create_button)
+        create_button.attachTextChangeAnimator()
 
         create_button.setOnClickListener {
+            if (createInProgress) return@setOnClickListener
+
+            createInProgress = true
+
+            create_button.showProgress {
+                progressColor = Color.WHITE
+                buttonText = ""
+                gravity = DrawableButton.GRAVITY_CENTER
+            }
+
             val db = RemoteDatabase()
-            
+
             db.signIn().addOnSuccessListener {
-                uploadProduct(db).addOnSuccessListener {
-                    finish()
+                db.upload(createProduct()).addOnSuccessListener { ids ->
+                    val uri = productModel.imageUri
+                    if (uri != Uri.EMPTY) {
+                        val imageStream = contentResolver.openInputStream(uri)
+                        if (imageStream != null) {
+                            db.uploadImage(ids[0], imageStream).addOnSuccessListener {
+                                finishSuccess()
+                            }
+                        } else {
+                            finishSuccess()
+                        }
+                    } else {
+                        finishSuccess()
+                    }
                 }.addOnFailureListener {
+                    create_button.hideProgress(R.string.create)
+                    createInProgress = false
                     Toast.makeText(
                         this,
                         "Unable to upload product to database.\n Please try again!",
@@ -101,46 +142,95 @@ class AddProductActivity : AppCompatActivity() {
                 }
             }
         }
+    }
 
-        close_button.setOnClickListener { finish() }
+    private fun finishSuccess() {
+        Toast.makeText(this, "Product was uploaded successfully!", Toast.LENGTH_LONG).show()
+        finish()
+    }
 
-        setFullScreen()
+    private fun setNextButtonClickListener() {
+        bindProgressButton(next_button)
+        next_button.attachTextChangeAnimator()
+
+        next_button.setOnClickListener {
+            if (nextInProgress) return@setOnClickListener
+
+            val currentFragment = pagedFormModel.currentFragment!!
+
+            if (currentFragment is AddProductFormPageAsyncFragment) {
+                next_button.showProgress {
+                    progressColor = Color.WHITE
+                    buttonText = ""
+                    gravity = DrawableButton.GRAVITY_CENTER
+                }
+
+                nextInProgress = true
+
+                currentFragment.asyncValidation { valid ->
+                    nextInProgress = false
+                    next_button.hideProgress(R.string.next)
+
+                    if (valid) navigateNext()
+                }
+            } else {
+                navigateNext()
+            }
+        }
+    }
+
+    private fun setPreviousButtonClickListener() {
+        previous_button.setOnClickListener {
+            navigatePrevious()
+        }
     }
 
     private fun navigateNext() {
-        navController.navigate(pagedFormModel.currentPage.value!!.nextNavAction()!!)
+        navController.navigate(pagedFormModel.getCurrentPage().nextNavAction()!!)
     }
 
     private fun navigatePrevious() {
-        navController.navigate(pagedFormModel.currentPage.value!!.previousNavAction()!!)
+        navController.navigate(pagedFormModel.getCurrentPage().previousNavAction()!!)
     }
 
-    private fun uploadProduct(db: RemoteDatabase): Task<List<String>> {
-        return db.upload(
-            Product(
-                productModel.englishName,
-                productModel.koreanName,
-                if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
-                productModel.description,
-                productModel.ingredients,
-                productModel.attributes
-            )
+    private fun createProduct(): Product {
+        return Product(
+            productModel.brand,
+            productModel.englishName,
+            productModel.koreanName,
+            if (!productModel.barcode.isNullOrBlank()) productModel.barcode else null,
+            productModel.description,
+            productModel.ingredients,
+            productModel.attributes
         )
     }
 
     private fun initViewModels() {
         productModel = ViewModelProviders.of(this)[ProductViewModel::class.java]
+
+        productListModel = ViewModelProviders.of(this)[ProductListViewModel::class.java]
+
+        val db = RemoteDatabase()
+
+        db.signIn().addOnSuccessListener {
+            db.getAllProducts().addOnSuccessListener { fbProductList ->
+                productListModel.productList = ArrayList(fbProductList)
+            }
+        }
+
         pagedFormModel = ViewModelProviders.of(this)[PagedFormModel::class.java]
 
         pagedFormModel.currentPage.observe(this, Observer { page ->
             previous_button.visibility = if (page.hasPrevious) View.VISIBLE else View.INVISIBLE
             next_button.visibility = if (page.hasNext) View.VISIBLE else View.INVISIBLE
+            next_button.isEnabled = pagedFormModel.isValid(page)
             create_button.visibility =
                 if (page == AddProductFormPage.values().last()) View.VISIBLE else View.INVISIBLE
         })
 
         pagedFormModel.valid.observe(this, Observer { map ->
             create_button.isEnabled = map.values.all { it }
+            next_button.isEnabled = map[pagedFormModel.getCurrentPage()] == true
         })
     }
 

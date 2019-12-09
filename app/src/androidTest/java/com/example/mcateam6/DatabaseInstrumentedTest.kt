@@ -22,9 +22,9 @@ import java.util.concurrent.TimeUnit
 class DatabaseInstrumentedTest {
 
     private lateinit var db: RemoteDatabase
-    private val ingre1 = Product("Ingredient1", "name1", "123123123", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, true)))
-    private val ingre2 = Product("Ingredient2", "name2", "321321321", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
-    private val prod = Product("Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
+    private val ingre1 = Product("BrandName", "Ingredient1", "name1", "123123123", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, true)))
+    private val ingre2 = Product("BrandName", "Ingredient2", "name2", "321321321", "This is a ingredient", emptyList(), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
+    private val prod = Product("BrandName", "Product", "name3", "456654456", "This is a product", listOf(ingre1, ingre2), mapOf(Pair(Attribute.VEGAN, false), Pair(Attribute.VEGETARIAN, false)))
 
 
     @Before
@@ -51,6 +51,7 @@ class DatabaseInstrumentedTest {
 
     private fun basicUpload() : String {
         val task = db.upload(
+            "BrandName",
             "TestProduct",
             "표본",
             "0123456789",
@@ -140,6 +141,13 @@ class DatabaseInstrumentedTest {
     }
 
     @Test
+    fun test_getInvalidProductByEnglishName() {
+        val task = db.getProductByEnglishName("BlaBla")
+        val res = Tasks.await(task, time, timeUnit)
+        assertNull("product not null", res)
+    }
+
+    @Test
     fun test_getProductByKoreanName() {
         val task = db.getProductByKoreanName("name3")
         val res = Tasks.await(task, time, timeUnit)
@@ -148,11 +156,25 @@ class DatabaseInstrumentedTest {
     }
 
     @Test
+    fun test_getInvalidProductByKoreanName() {
+        val task = db.getProductByKoreanName("BlaBla")
+        val res = Tasks.await(task, time, timeUnit)
+        assertNull("product not null", res)
+    }
+
+    @Test
     fun test_getProductByBarcode() {
         val task = db.getProductByBarcode("456654456")
         val res = Tasks.await(task, time, timeUnit)
         Log.i(this.javaClass.name, "Product: $res")
         assertTrue("products not identical", Product.equals(prod, res))
+    }
+
+    @Test
+    fun test_getInvalidProductByBarcode() {
+        val task = db.getProductByBarcode("11112222233333")
+        val res = Tasks.await(task, time, timeUnit)
+        assertNull("result not null", res)
     }
 
     @Test
@@ -209,5 +231,33 @@ class DatabaseInstrumentedTest {
         val task = db.searchEnglish("Test", true);
         val res = Tasks.await(task);
         assertTrue(res.all { firebaseProduct -> firebaseProduct.name_english.contains("Test", true) })
+    }
+
+    @Test
+    fun test_exists() {
+        val task = db.exists("BrandName", "Product")
+        val res = Tasks.await(task)
+        assertTrue(res)
+    }
+
+    @Test
+    fun test_NotExists() {
+        val task = db.exists("BrandName", "Prct")
+        val res = Tasks.await(task)
+        assertFalse(res)
+    }
+
+    @Test
+    fun test_existsBarcode() {
+        val task = db.barcodeExists("456654456")
+        val res = Tasks.await(task)
+        assertTrue(res)
+    }
+
+    @Test
+    fun test_NotExistsBarcode() {
+        val task = db.barcodeExists("000000000")
+        val res = Tasks.await(task)
+        assertFalse(res)
     }
 }
