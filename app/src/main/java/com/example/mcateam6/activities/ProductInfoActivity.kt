@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.mcateam6.R
 import com.example.mcateam6.adapters.SearchItemAdapter
@@ -25,6 +26,8 @@ class ProductInfoActivity : AppCompatActivity() {
         recycler_ingredients.adapter = itemAdapter
         recycler_ingredients.layoutManager = GridLayoutManager(this, 1)
 
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+
         val intent = this.intent
         val id = intent.extras?.get("id").toString()
 
@@ -38,15 +41,26 @@ class ProductInfoActivity : AppCompatActivity() {
                 text_description.text = product?.description
 
                 val attr = product?.attributes
-                if (attr?.get("VEGAN") == "true") {
+                val vegan = attr?.get("VEGAN")
+                val vegetarian = attr?.get("VEGETARIAN")
+
+                if (vegan == "true") {
                     image_vegan.setImageDrawable(getDrawable(android.R.drawable.checkbox_on_background))
                 } else {
                     image_vegan.setImageDrawable(getDrawable(android.R.drawable.checkbox_off_background))
                 }
-                if (attr?.get("VEGETARIAN") == "true") {
+                if (vegetarian == "true") {
                     image_vegetarian.setImageDrawable(getDrawable(android.R.drawable.checkbox_on_background))
                 } else {
                     image_vegetarian.setImageDrawable(getDrawable(android.R.drawable.checkbox_off_background))
+                }
+
+                val dietPref = sharedPreferences.getString("diet_pref", "")
+
+                if ((dietPref == "vegan" && vegan != "true") || (dietPref == "vegetarian" && vegetarian != "true")) {
+                    text_suitable.text = getString(R.string.unsuitable_product)
+                } else {
+                    text_suitable.text = getString(R.string.suitable_product)
                 }
 
                 val imageTask = db.downloadImageSmall(id)

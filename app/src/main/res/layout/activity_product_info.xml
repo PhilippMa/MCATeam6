@@ -90,6 +90,16 @@
             app:srcCompat="@android:drawable/checkbox_off_background" />
 
         <TextView
+            android:id="@+id/text_suitable"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/unsuitable_product"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_vegetarian" />
+
+        <TextView
             android:id="@+id/headline_description"
             style="@style/TextAppearance.MaterialComponents.Headline5"
             android:layout_width="wrap_content"
@@ -100,7 +110,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/text_vegetarian" />
+            app:layout_constraintTop_toBottomOf="@+id/text_suitable" />
 
         <TextView
             android:id="@+id/text_description"

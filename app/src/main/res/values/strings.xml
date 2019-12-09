@@ -32,6 +32,8 @@
     <string name="expand_search_card">Add Ingredients</string>
     <string name="english_and_korean_name">%s (%s)</string>
     <string name="optional_information">Optional Information</string>
+    <string name="suitable_product">This product is suitable for you!</string>
+    <string name="unsuitable_product">This product is unsuitable for you.</string>
 
     <string name="bottom_sheet_option_camera">Use Camera</string>
     <string name="bottom_sheet_option_gallery">Upload from Gallery</string>
