@@ -23,6 +23,8 @@ class ProductInfoActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_product_info)
 
+        back_button.setOnClickListener { finish() }
+
         itemAdapter = SearchItemAdapter(this, itemList)
         recycler_ingredients.adapter = itemAdapter
         recycler_ingredients.layoutManager = GridLayoutManager(this, 1)
