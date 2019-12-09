@@ -141,6 +141,13 @@ class DatabaseInstrumentedTest {
     }
 
     @Test
+    fun test_getInvalidProductByEnglishName() {
+        val task = db.getProductByEnglishName("BlaBla")
+        val res = Tasks.await(task, time, timeUnit)
+        assertNull("product not null", res)
+    }
+
+    @Test
     fun test_getProductByKoreanName() {
         val task = db.getProductByKoreanName("name3")
         val res = Tasks.await(task, time, timeUnit)
@@ -149,11 +156,25 @@ class DatabaseInstrumentedTest {
     }
 
     @Test
+    fun test_getInvalidProductByKoreanName() {
+        val task = db.getProductByKoreanName("BlaBla")
+        val res = Tasks.await(task, time, timeUnit)
+        assertNull("product not null", res)
+    }
+
+    @Test
     fun test_getProductByBarcode() {
         val task = db.getProductByBarcode("456654456")
         val res = Tasks.await(task, time, timeUnit)
         Log.i(this.javaClass.name, "Product: $res")
         assertTrue("products not identical", Product.equals(prod, res))
+    }
+
+    @Test
+    fun test_getInvalidProductByBarcode() {
+        val task = db.getProductByBarcode("11112222233333")
+        val res = Tasks.await(task, time, timeUnit)
+        assertNull("result not null", res)
     }
 
     @Test
