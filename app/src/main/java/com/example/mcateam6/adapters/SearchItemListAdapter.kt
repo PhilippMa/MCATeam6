@@ -2,13 +2,12 @@ package com.example.mcateam6.adapters
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.BaseAdapter
+import android.widget.ImageView
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.ProductInfoActivity
 import com.example.mcateam6.database.RemoteDatabase
@@ -49,6 +48,7 @@ class SearchItemListAdapter(val context: Context?, var itemList: List<RemoteData
     private class ViewHolder(view: View) {
         var tvNameKorean: TextView = view.findViewById(R.id.tv_name_korean)
         var tvNameEnglish: TextView = view.findViewById(R.id.tv_name_english)
+        var ivAttribute: ImageView = view.findViewById(R.id.iv_attribute)
     }
     fun updateWholeData(data: List<RemoteDatabase.FirebaseProduct>?) {
         itemList = data
