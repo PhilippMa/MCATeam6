@@ -25,6 +25,8 @@ class ProductInfoActivity : AppCompatActivity() {
 
         back_button.setOnClickListener { finish() }
 
+        db.signIn()
+
         itemAdapter = SearchItemAdapter(this, itemList)
         recycler_ingredients.adapter = itemAdapter
         recycler_ingredients.layoutManager = GridLayoutManager(this, 1)
@@ -68,13 +70,12 @@ class ProductInfoActivity : AppCompatActivity() {
                     text_suitable.text = getString(R.string.suitable_product)
                 }
 
-                val imageTask = db.downloadImageSmall(id)
+                val imageTask = db.downloadImage(id)
                 imageTask.addOnCompleteListener{ it2 ->
                     if (it2.isSuccessful) {
                         val byteArray = it2.result
                         val bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size)
-                        view_image.setImageBitmap(Bitmap.createScaledBitmap(
-                            bmp, view_image.width, view_image.height, false))
+                        view_image.setImageBitmap(Bitmap.createBitmap(bmp))
                         image_card.visibility = View.VISIBLE
                     }
                 }
