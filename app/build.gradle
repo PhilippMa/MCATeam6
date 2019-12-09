@@ -91,7 +91,7 @@ dependencies {
 
     implementation 'androidx.viewpager2:viewpager2:1.0.0-alpha06'
 
-    implementation 'org.tensorflow:tensorflow-lite:0.0.0-nightly'
+    implementation 'org.tensorflow:tensorflow-lite:1.12.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
 
