@@ -12,6 +12,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
@@ -92,6 +93,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         recyclerView = v.findViewById(R.id.recycler_view)
 
         itemAdapter = SearchItemAdapter(context, itemList)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val dietPref = sharedPreferences.getString("diet_pref", "None")
+
+        itemAdapter = SearchItemAdapter(context!!, mutableListOf(), dietPref!!)
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = GridLayoutManager(activity, 1)
 
@@ -168,6 +173,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                         setItemMode()
                         itemAdapter.updateWholeData(it.result)
                         mSearchedResult = it.result
+                        itemAdapter.updateWholeData(it.result)
                     }
                 }
             } else {
@@ -201,5 +207,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
             return filterItem
         }
 
+        recyclerView.visibility = View.VISIBLE
     }
 }
