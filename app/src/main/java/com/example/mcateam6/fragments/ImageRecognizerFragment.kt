@@ -25,6 +25,8 @@ import android.media.ImageReader
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
+import com.example.mcateam6.activities.AddProductActivity
 import com.example.mcateam6.activities.ProductInfoActivity
 import com.example.mcateam6.database.RemoteDatabase
 import org.tensorflow.lite.support.common.ops.NormalizeOp
@@ -47,8 +49,10 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
     private lateinit var outputProbabilityBuffer: TensorBuffer
     private lateinit var probabilityProcessor: TensorProcessor
 
-    private val PROBABILITY_MIN = 0.0f;
-    private val PROBABILITY_MAX = 1.0f;
+    private val db = RemoteDatabase()
+
+    private val PROBABILITY_MIN = 0.0f
+    private val PROBABILITY_MAX = 1.0f
 
     private val REQUEST_CODE_PERMISSIONS = 10
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
@@ -75,7 +79,7 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
             val labelsPath = "labelmap.txt"
             labels = FileUtil.loadLabels(activity as MainActivity, labelsPath)
 
-            val modelPath = "detect.tflite"
+            val modelPath = "products.tflite"
             val tfliteModel = FileUtil.loadMappedFile(activity as MainActivity, modelPath)
             val tfliteOptions = Interpreter.Options()
             tfliteOptions.setNumThreads(2)
@@ -163,28 +167,61 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
             activity as MainActivity, it
         ) == PackageManager.PERMISSION_GRANTED
     }
-
-    private val db = RemoteDatabase()
+    private val thisFramgent = this
+    private val PROB_CRITERIA = 0.6f
     override fun onClick(v: View?) {
         when (v?.id) {
             R.id.btn_classify -> {
                 val map = classify()
-                Log.d("map", map.toString())
                 var maxProb = 0.0f
                 var maxKey = ""
                 map?.let{
                     it.forEach {
                         var prob = it.value
-                        if (prob >=maxProb) {
+                        if (prob>=PROB_CRITERIA&&prob >=maxProb) {
                             maxProb = prob
                             maxKey = it.key
                         }
                     }
-                    Log.d("TEST", map.toString())
-                    Toast.makeText(activity, maxKey, Toast.LENGTH_SHORT).show()
-                } ?: Toast.makeText(activity, "NO ITEM", Toast.LENGTH_SHORT).show()
+                    Log.d("PRB", map.toString())
+                    if (maxProb==0.0f) {
+                        showProductNotFoundDialog()
+                    } else {
+                        val task = db.getProductById(maxKey)
+                        task?.addOnCompleteListener{ res ->
+                            if (res.isSuccessful && res.result != null) {
+                                val name = res.result?.name_english
+                                Toast.makeText(activity, name ?: maxKey, Toast.LENGTH_SHORT).show()
+                                val intent = Intent(activity, ProductInfoActivity::class.java).apply {
+                                    putExtra("id", maxKey)
+                                }
+                                activity?.startActivity(intent)
+                            } else {
+                                showProductNotFoundDialog()
+                            }
+                        }
+                    }
+                } ?: run {
+                    Toast.makeText(activity, "NO ITEM", Toast.LENGTH_SHORT).show()
+                }
             }
         }
+    }
+    private fun showProductNotFoundDialog() {
+        val builder = AlertDialog.Builder(context!!)
+        builder.setTitle("Can't recognize product")
+        builder.setMessage("We can't recognize product. The product may not in the database. Do you want to add it?")
+        builder.setPositiveButton("YES"){dialog, which ->
+            Toast.makeText(context,":)",Toast.LENGTH_SHORT).show()
+            val intent = Intent().setClass(context!!, AddProductActivity::class.java)
+            startActivity(intent)
+        }
+        builder.setNegativeButton("No"){dialog, which ->
+            Toast.makeText(context,":(",Toast.LENGTH_SHORT).show()
+            thisFramgent.onResume()
+        }
+        val dialog: AlertDialog = builder.create()
+        dialog.show()
     }
     private fun loadImage(bitmap:Bitmap, sensorOrientation:Int): TensorImage {
         // Loads bitmap into a TensorImage.
