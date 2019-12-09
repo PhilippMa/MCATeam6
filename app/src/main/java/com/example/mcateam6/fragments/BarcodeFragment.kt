@@ -77,11 +77,6 @@ class BarcodeFragment : Fragment(), OnClickListener {
             setOnClickListener(this@LiveBarcodeScanningActivity)
         }*/
 
-        v.findViewById<FloatingActionButton>(R.id.add_product_button).setOnClickListener {
-            val intent = Intent().setClass(context!!, AddProductActivity::class.java)
-            startActivity(intent)
-        }
-
 
         setUpWorkflowModel()
 

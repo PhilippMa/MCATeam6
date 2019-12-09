@@ -13,9 +13,9 @@
 
     <fragment
         android:id="@+id/navigation_barcode"
-        android:name="com.example.mcateam6.fragments.BarcodeFragment"
+        android:name="com.example.mcateam6.fragments.CameraFragment"
         android:label="@string/title_barcode"
-        tools:layout="@layout/fragment_barcode" />
+        tools:layout="@layout/fragment_camera" />
 
     <fragment
         android:id="@+id/navigation_setting"
