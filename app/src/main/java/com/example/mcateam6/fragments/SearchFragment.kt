@@ -11,6 +11,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
 import androidx.fragment.app.Fragment
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
@@ -61,7 +62,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     private val ITEM_KOREAN = 1
     private val ITEM_ENGLISH = 2
 
-    var itemList: MutableList<RemoteDatabase.FirebaseProduct>? = mutableListOf()
     lateinit var itemAdapter: SearchItemAdapter
 
     lateinit var recyclerView: RecyclerView
@@ -89,7 +89,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
         recyclerView = v.findViewById(R.id.recycler_view)
 
-        itemAdapter = SearchItemAdapter(context, itemList)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
+        val dietPref = sharedPreferences.getString("diet_pref", "None")
+
+        itemAdapter = SearchItemAdapter(context!!, mutableListOf(), dietPref!!)
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = GridLayoutManager(activity, 1)
         recyclerView.itemAnimator = FiltersListItemAnimator()
@@ -147,13 +150,13 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         var task: Task<List<RemoteDatabase.FirebaseProduct>>? = null
         when (itemIndex) {
             ITEM_ALL -> {
-                task = db.searchAll(text.toString().trim())
+                task = db.searchAll(text.toString())
             }
             ITEM_KOREAN -> {
-                task = db.searchKorean(text.toString().trim())
+                task = db.searchKorean(text.toString())
             }
             ITEM_ENGLISH -> {
-                task = db.searchEnglish(text.toString().trim())
+                task = db.searchEnglish(text.toString())
             }
         }
         task?.addOnCompleteListener{

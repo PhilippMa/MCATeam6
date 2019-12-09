@@ -85,4 +85,5 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0-alpha06'
 
     implementation 'com.github.Yalantis:SearchFilter:v1.0.4'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 }

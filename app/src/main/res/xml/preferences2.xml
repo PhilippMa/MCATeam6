@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:key="dietary_restrictions_category"
+        android:title="Dietary Restrictions">
+
+        <ListPreference
+            android:defaultValue="None"
+            android:entries="@array/diet_pref_entries"
+            android:entryValues="@array/diet_pref_values"
+            android:key="diet_pref"
+            android:summary="Click to choose your dietary preference"
+            android:title="Dietary Preference" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

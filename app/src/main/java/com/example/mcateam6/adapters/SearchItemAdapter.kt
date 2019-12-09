@@ -2,24 +2,21 @@ package com.example.mcateam6.adapters
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Color
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import androidx.recyclerview.widget.RecyclerView
-import com.example.mcateam6.database.RemoteDatabase
-import android.view.LayoutInflater
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
 import com.example.mcateam6.activities.ProductInfoActivity
+import com.example.mcateam6.database.RemoteDatabase
+import com.example.mcateam6.datatypes.Attribute
 
 
-class SearchItemAdapter constructor(val context: Context?, var itemList: MutableList<RemoteDatabase.FirebaseProduct>?) : RecyclerView.Adapter<SearchItemAdapter.ViewHolder>() {
-    companion object {
-        val VEGAN = "VEGAN"
-        val VEGETARIAN = "VEGETARIAN"
-    }
+
+class SearchItemAdapter(val context: Context, var productList: MutableList<RemoteDatabase.FirebaseProduct>, private val dietPref: String = "None") : RecyclerView.Adapter<SearchItemAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context = parent.context
@@ -30,25 +27,33 @@ class SearchItemAdapter constructor(val context: Context?, var itemList: Mutable
     }
 
     override fun getItemCount(): Int {
-        return itemList?.size ?: 0
+        return productList.size
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = itemList?.get(position)
+        val product = productList[position].toProduct()
 
-        holder.tvNameKorean.text = item?.name_korean
-        holder.tvNameEnglish.text = item?.name_english
+        holder.tvNameKorean.text = product.koreanName
+        holder.tvNameEnglish.text = product.englishName
 
-        // TODO()
-        val attribute = item?.attributes
-        val vegan:Boolean = attribute?.get(VEGAN)?.toBoolean() ?: false
-        val vegetarian: Boolean = attribute?.get(VEGETARIAN)?.toBoolean() ?: false
-        if (vegan) {
-            holder.ivAttribute.setBackgroundColor(Color.parseColor("#006400"))
-        } else if (vegetarian) {
-            holder.ivAttribute.setBackgroundColor(Color.parseColor("#90ee90"))
-        } else {
-            holder.ivAttribute.setBackgroundColor(Color.parseColor("#d3d3d3"))
+        val vegan: Boolean = product.attributes[Attribute.VEGAN] == true
+        val vegetarian: Boolean = product.attributes[Attribute.VEGETARIAN] == true
+
+        when (dietPref) {
+            "None" ->
+                holder.ivAttribute.setImageResource(R.drawable.ic_check_green_24dp)
+            "Vegetarian" ->
+                if (vegetarian) {
+                    holder.ivAttribute.setImageResource(R.drawable.ic_check_green_24dp)
+                } else {
+                    holder.ivAttribute.setImageResource(R.drawable.ic_warning_orange_24dp)
+                }
+            "Vegan" ->
+                if (vegan) {
+                    holder.ivAttribute.setImageResource(R.drawable.ic_check_green_24dp)
+                } else {
+                    holder.ivAttribute.setImageResource(R.drawable.ic_warning_orange_24dp)
+                }
         }
     }
 
@@ -56,14 +61,14 @@ class SearchItemAdapter constructor(val context: Context?, var itemList: Mutable
         init {
             view.setOnClickListener {
                 val pos = adapterPosition
-                val item = itemList?.get(pos)
+                val item = productList[pos]
 
                 val intent = Intent(context, ProductInfoActivity::class.java).apply {
-                    putExtra("englishName", item?.name_english)
-                    putExtra("koreanName", item?.name_korean)
-                    putExtra("description", item?.description)
+                    putExtra("englishName", item.name_english)
+                    putExtra("koreanName", item.name_korean)
+                    putExtra("description", item.description)
                 }
-                context?.startActivity(intent)
+                context.startActivity(intent)
             }
         }
         var tvNameKorean: TextView = view.findViewById(R.id.tv_name_korean)
@@ -91,16 +96,16 @@ class SearchItemAdapter constructor(val context: Context?, var itemList: Mutable
 
     }
     fun updateItemList (newList: List<RemoteDatabase.FirebaseProduct>?) {
-        val diffCallback = ItemDiffCallback(this.itemList, newList)
+        val diffCallback = ItemDiffCallback(this.productList, newList)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 
-        this.itemList?.clear()
-        this.itemList?.addAll(newList as Iterable<RemoteDatabase.FirebaseProduct>)
+        this.productList.clear()
+        this.productList.addAll(newList as Iterable<RemoteDatabase.FirebaseProduct>)
         diffResult.dispatchUpdatesTo(this)
     }
     fun updateWholeData(newList: List<RemoteDatabase.FirebaseProduct>?) {
-        itemList?.clear()
-        itemList?.addAll(newList as MutableList)
+        productList.clear()
+        productList.addAll(newList as MutableList)
 
         this.notifyDataSetChanged()
     }
