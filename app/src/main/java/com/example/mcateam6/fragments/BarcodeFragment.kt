@@ -207,25 +207,27 @@ class BarcodeFragment : Fragment(), OnClickListener {
                 val task = db.getProductByBarcode(barcode.rawValue!!)
                 task?.addOnCompleteListener{
                     if (it.isSuccessful) {
-                        var productName = it.result?.name_english
-                        Toast.makeText(context,it.result?.name_english,Toast.LENGTH_SHORT).show()
-                        Toast.makeText(context, productName, Toast.LENGTH_SHORT)
-                        //Call Product Info intent
-                    } else {
-                        val builder = AlertDialog.Builder(context!!)
-                        builder.setTitle("Product not found")
-                        builder.setMessage("Product does not exist on our database. Would you like to add it?")
-                        builder.setPositiveButton("YES"){dialog, which ->
-                            Toast.makeText(context,":)",Toast.LENGTH_SHORT).show()
-                            val intent = Intent().setClass(context!!, AddProductActivity::class.java)
-                            startActivity(intent)
-                        }
-                        builder.setNegativeButton("No"){dialog, which ->
-                            Toast.makeText(context,":(",Toast.LENGTH_SHORT).show()
+                        if (it.result == null) {
+                            val builder = AlertDialog.Builder(context!!)
+                            builder.setTitle("Product not found")
+                            builder.setMessage("Product does not exist on our database. Would you like to add it?")
+                            builder.setPositiveButton("YES"){dialog, which ->
+                                val intent = Intent().setClass(context!!, AddProductActivity::class.java)
+                                startActivity(intent)
+                            }
+                            builder.setNegativeButton("No"){dialog, which ->
+                                this.onResume()
+                            }
+                            val dialog: AlertDialog = builder.create()
+                            dialog.show()
+                        } else {
+                            Toast.makeText(context,it.result?.name_english,Toast.LENGTH_SHORT).show()
                             this.onResume()
+                            //Call Product Info intent
                         }
-                        val dialog: AlertDialog = builder.create()
-                        dialog.show()
+                    } else {
+                        Toast.makeText(context,"Search by barcode failed",Toast.LENGTH_SHORT).show()
+                        this.onResume()
                     }
                 }
 /*                val barcodeFieldList = ArrayList<BarcodeField>()
