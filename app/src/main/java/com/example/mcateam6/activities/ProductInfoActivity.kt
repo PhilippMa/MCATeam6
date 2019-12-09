@@ -2,6 +2,7 @@ package com.example.mcateam6.activities
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
@@ -66,8 +67,10 @@ class ProductInfoActivity : AppCompatActivity() {
 
                 if ((dietPref == "vegan" && vegan != "true") || (dietPref == "vegetarian" && vegetarian != "true")) {
                     text_suitable.text = getString(R.string.unsuitable_product)
+                    text_suitable.setTextColor(Color.parseColor("#cc0000"))
                 } else {
                     text_suitable.text = getString(R.string.suitable_product)
+                    text_suitable.setTextColor(Color.parseColor("#669900"))
                 }
 
                 val imageTask = db.downloadImage(id)
