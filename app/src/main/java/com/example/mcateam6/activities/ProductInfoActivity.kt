@@ -65,7 +65,7 @@ class ProductInfoActivity : AppCompatActivity() {
 
                 val dietPref = sharedPreferences.getString("diet_pref", "")
 
-                if ((dietPref == "vegan" && vegan != "true") || (dietPref == "vegetarian" && vegetarian != "true")) {
+                if ((dietPref == "Vegan" && vegan != "true") || (dietPref == "Vegetarian" && vegetarian != "true")) {
                     text_suitable.text = getString(R.string.unsuitable_product)
                     text_suitable.setTextColor(Color.parseColor("#cc0000"))
                 } else {
