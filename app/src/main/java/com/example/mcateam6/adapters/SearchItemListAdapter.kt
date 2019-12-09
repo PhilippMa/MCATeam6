@@ -1,4 +1,4 @@
-package com.example.mcateam6.adapters
+gipackage com.example.mcateam6.adapters
 
 import android.content.Context
 import android.content.Intent
