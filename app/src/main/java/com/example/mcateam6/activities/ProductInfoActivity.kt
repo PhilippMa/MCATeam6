@@ -3,6 +3,7 @@ package com.example.mcateam6.activities
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceManager
@@ -43,16 +44,18 @@ class ProductInfoActivity : AppCompatActivity() {
                 val attr = product?.attributes
                 val vegan = attr?.get("VEGAN")
                 val vegetarian = attr?.get("VEGETARIAN")
+                val checkboxOn = getDrawable(android.R.drawable.checkbox_on_background)
+                val checkboxOff = getDrawable(android.R.drawable.checkbox_off_background)
 
                 if (vegan == "true") {
-                    image_vegan.setImageDrawable(getDrawable(android.R.drawable.checkbox_on_background))
+                    text_vegan.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, checkboxOn, null)
                 } else {
-                    image_vegan.setImageDrawable(getDrawable(android.R.drawable.checkbox_off_background))
+                    text_vegan.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, checkboxOff, null)
                 }
                 if (vegetarian == "true") {
-                    image_vegetarian.setImageDrawable(getDrawable(android.R.drawable.checkbox_on_background))
+                    text_vegetarian.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, checkboxOn, null)
                 } else {
-                    image_vegetarian.setImageDrawable(getDrawable(android.R.drawable.checkbox_off_background))
+                    text_vegetarian.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, checkboxOff, null)
                 }
 
                 val dietPref = sharedPreferences.getString("diet_pref", "")
@@ -70,9 +73,7 @@ class ProductInfoActivity : AppCompatActivity() {
                         val bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray!!.size)
                         view_image.setImageBitmap(Bitmap.createScaledBitmap(
                             bmp, view_image.width, view_image.height, false))
-                    } else {
-                        val toast = Toast.makeText(this, "Failed to load image", Toast.LENGTH_SHORT)
-                        toast.show()
+                        image_card.visibility = View.VISIBLE
                     }
                 }
 
