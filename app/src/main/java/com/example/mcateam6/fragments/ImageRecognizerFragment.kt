@@ -28,6 +28,10 @@ import android.widget.TextView
 import com.example.mcateam6.activities.ProductInfoActivity
 import com.example.mcateam6.database.RemoteDatabase
 import org.tensorflow.lite.support.common.ops.NormalizeOp
+import org.tensorflow.lite.support.image.ImageProcessor
+import org.tensorflow.lite.support.image.ops.ResizeOp
+import org.tensorflow.lite.support.image.ops.ResizeWithCropOrPadOp
+import org.tensorflow.lite.support.image.ops.Rot90Op
 import org.tensorflow.lite.support.label.TensorLabel
 import java.io.FileInputStream
 import java.io.IOException
@@ -83,9 +87,13 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
             activity?.finish()
         }
 
+        mCamera = Camera2API(this)
+        mCamera.setViewFinder(viewFinder)
+
         var imageShape = tflite.getInputTensor(0).shape()
         imageWidth = imageShape[1]
         imageHeight = imageShape[2]
+        Log.d("HEIGHT", imageWidth.toString())
         val imageDataType = tflite.getInputTensor(0).dataType()
         inputImageBuffer = TensorImage(imageDataType)
 
@@ -98,8 +106,6 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
             NormalizeOp(PROBABILITY_MIN, PROBABILITY_MAX)
         ).build()
 
-        mCamera = Camera2API(this)
-        mCamera.setViewFinder(viewFinder)
         return v
     }
 
@@ -107,8 +113,8 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
         mCamera.takePicture()
         val frameBitmap = mCamera.frameBitmap
         if (frameBitmap==null||imageWidth===null||imageHeight===null) return null
-        val resized = Bitmap.createScaledBitmap(frameBitmap, imageWidth!!, imageHeight!!, true)
-        inputImageBuffer.load(resized)
+        val resized = Bitmap.createScaledBitmap(frameBitmap, frameBitmap.width, frameBitmap.height, true)
+        inputImageBuffer = loadImage(resized, 90)
         tflite.run(inputImageBuffer.buffer, outputProbabilityBuffer.buffer.rewind())
 
         val labeledProbability = TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer)).mapWithFloatValue
@@ -180,7 +186,21 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
             }
         }
     }
+    private fun loadImage(bitmap:Bitmap, sensorOrientation:Int): TensorImage {
+        // Loads bitmap into a TensorImage.
+        inputImageBuffer.load(bitmap)
+        // Creates processor for the TensorImage.
+        val cropSize = Math.min(bitmap.getWidth(), bitmap.getHeight())
+        val numRoration = sensorOrientation / 90
 
+        val imageProcessor = ImageProcessor.Builder()
+            .add(ResizeWithCropOrPadOp(cropSize, cropSize))
+            .add(ResizeOp(imageWidth!!, imageHeight!!, ResizeOp.ResizeMethod.BILINEAR))
+            .add(Rot90Op(numRoration))
+            .add(NormalizeOp(127.5f, 127.5f))
+            .build()
+        return imageProcessor.process(inputImageBuffer)
+    }
     override fun onCameraDeviceOpened(cameraDevice: CameraDevice?, cameraSize: Size?) {
         if (cameraSize==null) return
         val texture = viewFinder.surfaceTexture

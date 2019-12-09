@@ -175,6 +175,7 @@ public class Camera2API {
     public void setViewFinder(TextureView viewFinder) {
         this.viewFinder = viewFinder;
     }
+
     public void takePicture() {
         try {
             ImageReader reader = ImageReader.newInstance(mCameraSize.getWidth(), mCameraSize.getHeight(), ImageFormat.JPEG, 2);
