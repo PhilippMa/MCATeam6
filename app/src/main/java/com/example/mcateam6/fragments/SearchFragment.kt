@@ -1,21 +1,20 @@
 package com.example.mcateam6.fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.ListView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mcateam6.R
+import com.example.mcateam6.activities.MainActivity
 import com.example.mcateam6.adapters.SearchItemAdapter
 import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Attribute
@@ -23,15 +22,11 @@ import com.example.mcateam6.datatypes.Tag
 import com.google.android.gms.tasks.Task
 import com.mancj.materialsearchbar.MaterialSearchBar
 import com.yalantis.filter.adapter.FilterAdapter
-import com.yalantis.filter.widget.FilterItem
-import kotlinx.android.synthetic.main.fragment_search.*
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.example.mcateam6.activities.MainActivity
-import com.yalantis.filter.animator.FiltersListItemAnimator
 import com.yalantis.filter.listener.FilterListener
 import com.yalantis.filter.widget.Filter
-import java.util.ArrayList
+import com.yalantis.filter.widget.FilterItem
+import kotlinx.android.synthetic.main.fragment_search.*
+import java.util.*
 
 
 class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSearchBar.OnSearchActionListener, FilterListener<Tag> {
@@ -42,12 +37,12 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     }
 
     override fun onFiltersSelected(filters: ArrayList<Tag>) {
-        var newItemList = mutableListOf<RemoteDatabase.FirebaseProduct>()
+        val newItemList = mutableListOf<RemoteDatabase.FirebaseProduct>()
         mSearchedResult?.forEach {
             for (tag in filters) {
                 val b = it.attributes.get(tag.getText())?.toBoolean() ?: false
                 if (b) {
-                    newItemList.add(it)
+                    if (!newItemList.contains(it)) newItemList.add(it)
                 }
             }
         }
@@ -63,12 +58,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     private val ITEM_KOREAN = 1
     private val ITEM_ENGLISH = 2
 
-    var itemList: MutableList<RemoteDatabase.FirebaseProduct>? = mutableListOf()
     lateinit var itemAdapter: SearchItemAdapter
 
     lateinit var recyclerView: RecyclerView
     lateinit var tvNoItem: TextView
-    lateinit var chipGroup: ChipGroup
     lateinit var mFilter: Filter<Tag>
 
     var mSearchedResult: List<RemoteDatabase.FirebaseProduct>? = listOf()
@@ -92,7 +85,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
         recyclerView = v.findViewById(R.id.recycler_view)
 
-        itemAdapter = SearchItemAdapter(context, itemList)
         val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
         val dietPref = sharedPreferences.getString("diet_pref", "None")
 
@@ -106,10 +98,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         initialFilter()
         return v
     }
-    fun initialFilter() {
+    private fun initialFilter() {
         mColors = resources.getIntArray(R.array.filter_color)
-        var idx = 0
-        var tags: MutableList<Tag> = mutableListOf()
+        val tags: MutableList<Tag> = mutableListOf()
+        var idx = 1
         Attribute.values().forEach {
             mTitles.add(it.name)
             tags.add(Tag(it.name, mColors[idx++]))
@@ -173,11 +165,10 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
                         setItemMode()
                         itemAdapter.updateWholeData(it.result)
                         mSearchedResult = it.result
-                        itemAdapter.updateWholeData(it.result)
                     }
                 }
             } else {
-                Toast.makeText(context, "Fail to load search list", Toast.LENGTH_SHORT)
+                Toast.makeText(context, "Fail to load search list", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -194,19 +185,18 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
             val context = activity as MainActivity
             val filterItem = FilterItem(context)
 
-            filterItem.strokeColor = android.R.color.black
-            filterItem.textColor = android.R.color.black
-            filterItem.cornerRadius = 14F
+            filterItem.strokeColor = mColors[0]
+            filterItem.textColor = mColors[0]
+            filterItem.color = ContextCompat.getColor(context, android.R.color.white)
+
             filterItem.checkedTextColor =
                 ContextCompat.getColor(context, android.R.color.white)
-            filterItem.color = ContextCompat.getColor(context, android.R.color.white)
-            filterItem.checkedColor = mColors[position]
+            filterItem.checkedColor = mColors[position+1]
             filterItem.text = item.getText()
             filterItem.deselect()
 
             return filterItem
         }
 
-        recyclerView.visibility = View.VISIBLE
     }
 }

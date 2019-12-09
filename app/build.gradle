@@ -89,11 +89,10 @@ dependencies {
 
     implementation 'com.github.yalantis:ucrop:2.2.4'
 
-    implementation 'androidx.viewpager2:viewpager2:1.0.0-alpha06'
-
     implementation 'org.tensorflow:tensorflow-lite:1.12.0'
     implementation 'org.tensorflow:tensorflow-lite-gpu:0.0.0-nightly'
     implementation 'org.tensorflow:tensorflow-lite-support:0.0.0-nightly'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     implementation 'com.github.Yalantis:SearchFilter:v1.0.4'
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
