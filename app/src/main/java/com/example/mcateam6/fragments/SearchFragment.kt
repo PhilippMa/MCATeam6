@@ -20,14 +20,14 @@ import com.example.mcateam6.database.RemoteDatabase
 import com.example.mcateam6.datatypes.Attribute
 import com.example.mcateam6.datatypes.Tag
 import com.google.android.gms.tasks.Task
-import com.google.android.material.chip.Chip
-import com.google.android.material.chip.ChipGroup
 import com.mancj.materialsearchbar.MaterialSearchBar
 import com.yalantis.filter.adapter.FilterAdapter
 import com.yalantis.filter.widget.FilterItem
 import kotlinx.android.synthetic.main.fragment_search.*
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.mcateam6.activities.MainActivity
+import com.yalantis.filter.animator.FiltersListItemAnimator
 import com.yalantis.filter.listener.FilterListener
 import com.yalantis.filter.widget.Filter
 import java.util.ArrayList
@@ -116,15 +116,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         mFilter.build()
     }
 
-    fun initialChip() {
-        Attribute.values().forEach {
-//            mTitles.add(it.name)
-            var chip = Chip(activity)
-            chip.text = it.name
-            chip.isCheckable = true
-            chipGroup.addView(chip)
-        }
-    }
     override fun onMenuItemClick(item: MenuItem?): Boolean {
         when(item?.itemId) {
             R.id.item_all -> {

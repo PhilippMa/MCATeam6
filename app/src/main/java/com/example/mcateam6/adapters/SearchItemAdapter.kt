@@ -23,7 +23,6 @@ class SearchItemAdapter constructor(val context: Context?, var itemList: Mutable
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val context = parent.context
-        val inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         val view = LayoutInflater.from(context).inflate(R.layout.search_listview_item, null)
 

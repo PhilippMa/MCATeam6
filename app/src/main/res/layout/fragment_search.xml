@@ -12,30 +12,25 @@
         android:layout_height="wrap_content"
         android:id="@+id/searchBar" />
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_view"
+            android:layout_marginTop="@dimen/container_height"
+            android:visibility="gone"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <com.yalantis.filter.widget.Filter
-        android:id="@+id/filter"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
+            android:layout_height="match_parent"/>
+        <com.yalantis.filter.widget.Filter
+            android:id="@+id/filter"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </FrameLayout>
     <TextView
         android:id="@+id/tv_no_item"
         android:text="No Item"
         android:layout_gravity="center"
         android:visibility="visible"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler_view"
-        android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </LinearLayout>
