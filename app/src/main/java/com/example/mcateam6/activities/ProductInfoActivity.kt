@@ -17,7 +17,6 @@ import kotlinx.android.synthetic.main.activity_product_info.*
 class ProductInfoActivity : AppCompatActivity() {
     val db = RemoteDatabase()
 
-    var itemList: MutableList<RemoteDatabase.FirebaseProduct>? = mutableListOf()
     lateinit var itemAdapter: SearchItemAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -28,11 +27,12 @@ class ProductInfoActivity : AppCompatActivity() {
 
         db.signIn()
 
-        itemAdapter = SearchItemAdapter(this, itemList)
+        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
+        val dietPref = sharedPreferences.getString("diet_pref", "None")
+
+        itemAdapter = SearchItemAdapter(this, mutableListOf(), dietPref!!)
         recycler_ingredients.adapter = itemAdapter
         recycler_ingredients.layoutManager = GridLayoutManager(this, 1)
-
-        val sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         val intent = this.intent
         val id = intent.extras?.get("id").toString()
@@ -68,8 +68,6 @@ class ProductInfoActivity : AppCompatActivity() {
                 } else {
                     text_vegetarian.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, checkboxOff, null)
                 }
-
-                val dietPref = sharedPreferences.getString("diet_pref", "")
 
                 if ((dietPref == "Vegan" && vegan != "true") || (dietPref == "Vegetarian" && vegetarian != "true")) {
                     text_suitable.text = getString(R.string.unsuitable_product)
