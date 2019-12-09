@@ -81,7 +81,7 @@ class ProductGeneralInformationFragment : AddProductFormPageAsyncFragment() {
                     if (enNameValid) {
                         null
                     } else {
-                        getString(R.string.error_required_field, getString(R.string.korean_name))
+                        getString(R.string.error_required_field, getString(R.string.english_name))
                     }
                 updateValidationModel()
 
