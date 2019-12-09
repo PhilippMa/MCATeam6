@@ -25,7 +25,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
     private val ITEM_KOREAN = 1
     private val ITEM_ENGLISH = 2
 
-    var itemList: MutableList<RemoteDatabase.FirebaseProduct>? = mutableListOf()
     lateinit var itemAdapter: SearchItemAdapter
 
     lateinit var recyclerView: RecyclerView
@@ -47,7 +46,7 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
 
         recyclerView = v.findViewById(R.id.recycler_view)
 
-        itemAdapter = SearchItemAdapter(context, itemList)
+        itemAdapter = SearchItemAdapter(context!!, mutableListOf())
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = GridLayoutManager(activity, 1)
 
