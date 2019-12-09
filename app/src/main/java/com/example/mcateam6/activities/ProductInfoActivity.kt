@@ -95,7 +95,7 @@ class ProductInfoActivity : AppCompatActivity() {
                         itemAdapter.updateWholeData(it3.result)
                         if (!it3.result.isNullOrEmpty()) {
                             headline_ingredients.visibility = View.VISIBLE
-                            text_description.visibility = View.VISIBLE
+                            recycler_ingredients.visibility = View.VISIBLE
                         }
                     } else {
                         val toast = Toast.makeText(this, "Failed to load ingredients", Toast.LENGTH_SHORT)
