@@ -1,0 +1,6 @@
+cappuccino
+juice
+peanuts
+puffed_rice
+salt
+water

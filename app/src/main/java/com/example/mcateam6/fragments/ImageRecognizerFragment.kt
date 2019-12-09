@@ -3,6 +3,7 @@ package com.example.mcateam6.fragments
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.*
@@ -24,6 +25,8 @@ import android.media.ImageReader
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
+import com.example.mcateam6.activities.ProductInfoActivity
+import com.example.mcateam6.database.RemoteDatabase
 import org.tensorflow.lite.support.common.ops.NormalizeOp
 import org.tensorflow.lite.support.label.TensorLabel
 import java.io.FileInputStream
@@ -32,27 +35,6 @@ import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
 
 class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureView.SurfaceTextureListener, View.OnClickListener {
-    override fun onClick(v: View?) {
-        when (v?.id) {
-            R.id.btn_classify -> {
-                val map = classify()
-                Log.d("map", map.toString())
-                var maxProb = 0.0f
-                var maxKey = ""
-                map?.let{
-                    it.forEach {
-                        var prob = it.value
-                        if (prob >=maxProb) {
-                            maxProb = prob
-                            maxKey = it.key
-                        }
-                    }
-                    Toast.makeText(activity, maxKey, Toast.LENGTH_SHORT).show()
-                } ?: Toast.makeText(activity, "NO ITEM", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
     private lateinit var tflite: Interpreter
     private var labels = mutableListOf<String>()
     private var imageWidth: Int? = null
@@ -64,56 +46,6 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
     private val PROBABILITY_MIN = 0.0f;
     private val PROBABILITY_MAX = 1.0f;
 
-    override fun onCameraDeviceOpened(cameraDevice: CameraDevice?, cameraSize: Size?) {
-        if (cameraSize==null) return
-        val texture = viewFinder.surfaceTexture
-        texture.setDefaultBufferSize(cameraSize.width, cameraSize.height)
-        val surface = Surface(texture)
-
-        mCamera.CaptureSession_4(cameraDevice, surface)
-        mCamera.CaptureRequest_5(cameraDevice, surface)
-    }
-
-    override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
-    }
-
-    override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
-    }
-
-    override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
-        return true
-    }
-
-    override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
-        openCamera()
-    }
-    protected fun classify(): Map<String, Float>? {
-        mCamera.takePicture()
-        val frameBitmap = mCamera.frameBitmap
-        if (frameBitmap==null||imageWidth===null||imageHeight===null) return null
-        val resized = Bitmap.createScaledBitmap(frameBitmap, imageWidth!!, imageHeight!!, true)
-        inputImageBuffer.load(resized)
-        tflite.run(inputImageBuffer.buffer, outputProbabilityBuffer.buffer.rewind())
-
-        val labeledProbability = TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer)).mapWithFloatValue
-        return labeledProbability
-    }
-    override fun onResume() {
-        super.onResume()
-        if (viewFinder.isAvailable) {
-            openCamera()
-        } else {
-            viewFinder.surfaceTextureListener = this
-        }
-    }
-
-    override fun onPause() {
-        closeCamera()
-        super.onPause()
-    }
-    fun closeCamera() {
-        mCamera.closeCamera()
-    }
     private val REQUEST_CODE_PERMISSIONS = 10
     private val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
 
@@ -136,10 +68,10 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
         btnClassify.setOnClickListener(this)
 
         try {
-            val labelsPath = "labels.txt"
+            val labelsPath = "labelmap.txt"
             labels = FileUtil.loadLabels(activity as MainActivity, labelsPath)
 
-            val modelPath = "mobilenet_v1_1.0_224_quant.tflite"
+            val modelPath = "detect.tflite"
             val tfliteModel = FileUtil.loadMappedFile(activity as MainActivity, modelPath)
             val tfliteOptions = Interpreter.Options()
             tfliteOptions.setNumThreads(2)
@@ -171,11 +103,41 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
         return v
     }
 
+    protected fun classify(): Map<String, Float>? {
+        mCamera.takePicture()
+        val frameBitmap = mCamera.frameBitmap
+        if (frameBitmap==null||imageWidth===null||imageHeight===null) return null
+        val resized = Bitmap.createScaledBitmap(frameBitmap, imageWidth!!, imageHeight!!, true)
+        inputImageBuffer.load(resized)
+        tflite.run(inputImageBuffer.buffer, outputProbabilityBuffer.buffer.rewind())
+
+        val labeledProbability = TensorLabel(labels, probabilityProcessor.process(outputProbabilityBuffer)).mapWithFloatValue
+        return labeledProbability
+    }
+    override fun onResume() {
+        super.onResume()
+        if (viewFinder.isAvailable) {
+            openCamera()
+        } else {
+            viewFinder.surfaceTextureListener = this
+        }
+    }
+
+    override fun onPause() {
+        closeCamera()
+        super.onPause()
+    }
+    fun closeCamera() {
+        mCamera.closeCamera()
+    }
+
     fun openCamera() {
         val cameraManager = mCamera.CameraManager_1(activity)
         val cameraId = mCamera.CameraCharacteristics_2(cameraManager)
         mCamera.CameraDevice_3(cameraManager, cameraId)
     }
+
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -194,5 +156,52 @@ class ImageRecognizerFragment: Fragment(), Camera2API.Camera2Interface, TextureV
         ContextCompat.checkSelfPermission(
             activity as MainActivity, it
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private val db = RemoteDatabase()
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.btn_classify -> {
+                val map = classify()
+                Log.d("map", map.toString())
+                var maxProb = 0.0f
+                var maxKey = ""
+                map?.let{
+                    it.forEach {
+                        var prob = it.value
+                        if (prob >=maxProb) {
+                            maxProb = prob
+                            maxKey = it.key
+                        }
+                    }
+                    Log.d("TEST", map.toString())
+                    Toast.makeText(activity, maxKey, Toast.LENGTH_SHORT).show()
+                } ?: Toast.makeText(activity, "NO ITEM", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    override fun onCameraDeviceOpened(cameraDevice: CameraDevice?, cameraSize: Size?) {
+        if (cameraSize==null) return
+        val texture = viewFinder.surfaceTexture
+        texture.setDefaultBufferSize(cameraSize.width, cameraSize.height)
+        val surface = Surface(texture)
+
+        mCamera.CaptureSession_4(cameraDevice, surface)
+        mCamera.CaptureRequest_5(cameraDevice, surface)
+    }
+
+    override fun onSurfaceTextureSizeChanged(surface: SurfaceTexture?, width: Int, height: Int) {
+    }
+
+    override fun onSurfaceTextureUpdated(surface: SurfaceTexture?) {
+    }
+
+    override fun onSurfaceTextureDestroyed(surface: SurfaceTexture?): Boolean {
+        return true
+    }
+
+    override fun onSurfaceTextureAvailable(surface: SurfaceTexture?, width: Int, height: Int) {
+        openCamera()
     }
 }
