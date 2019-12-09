@@ -91,7 +91,6 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         itemAdapter = SearchItemAdapter(context!!, mutableListOf(), dietPref!!)
         recyclerView.adapter = itemAdapter
         recyclerView.layoutManager = GridLayoutManager(activity, 1)
-
         tvNoItem = v.findViewById(R.id.tv_no_item)
 
         mFilter = v.findViewById(R.id.filter)
@@ -146,13 +145,13 @@ class SearchFragment : Fragment(), PopupMenu.OnMenuItemClickListener, MaterialSe
         var task: Task<List<RemoteDatabase.FirebaseProduct>>? = null
         when (itemIndex) {
             ITEM_ALL -> {
-                task = db.searchAll(text.toString().trim())
+                task = db.searchAll(text.toString())
             }
             ITEM_KOREAN -> {
-                task = db.searchKorean(text.toString().trim())
+                task = db.searchKorean(text.toString())
             }
             ITEM_ENGLISH -> {
-                task = db.searchEnglish(text.toString().trim())
+                task = db.searchEnglish(text.toString())
             }
         }
         task?.addOnCompleteListener{
